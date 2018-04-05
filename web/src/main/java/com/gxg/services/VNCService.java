@@ -1,0 +1,252 @@
+package com.gxg.services;
+
+import com.gxg.dao.ExperimentalNodeDao;
+import com.gxg.entities.ExperimentalNode;
+import org.json.JSONObject;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+
+import javax.servlet.http.HttpServletRequest;
+import java.io.*;
+import java.net.Socket;
+import java.sql.Timestamp;
+import java.util.List;
+
+/**
+ * Created by 郭欣光 on 2017/12/28.
+ */
+
+@Service
+public class VNCService {
+
+    @Value("${vnc.port}")
+    private int port;
+
+    @Value("${vnc.closed.time}")
+    private int closedSeconds; //多少秒不使用时自动关闭
+
+    @Autowired
+    private ExperimentalNodeDao experimentalNodeDao;
+
+    @Autowired
+    private IpService ipService;
+
+    /**
+     * 发送启动vnc的socket信号
+     * @param ip
+     * @param screenSize
+     * @return
+     */
+    public String startVNC(String ip, String screenSize) {
+        try{
+            //创建一个套接字并将其连接到指定主机的指定端口
+            Socket socket = new Socket(ip, port);
+
+            OutputStream outputStream = socket.getOutputStream();//获取一个输出流，向服务器发送信息
+            PrintWriter printWriter = new PrintWriter(outputStream);//将输出流包装成打印流
+            printWriter.print("start:" + screenSize);
+            printWriter.flush();
+            socket.shutdownOutput();//关闭输出流
+
+            InputStream inputStream = socket.getInputStream();//获取一个输入流，接收服务器的信息
+            byte[] buf = new byte[1024];
+            int len = inputStream.read(buf);
+            String info = new String(buf,0,len);
+            //关闭相对应的资源
+            inputStream.close();
+            printWriter.close();
+            outputStream.close();
+            socket.close();
+            if(info.equals("ok")) {
+                return "ok:" + ip;
+            } else {
+                return "开启VNC服务出错！";
+            }
+        } catch (Exception e) {
+            return "向节点发送请求开启VNC服务时出现异常：" + e.getMessage();
+        }
+
+    }
+
+    /**
+     * 发送关闭vnc的socket信号
+     * @param ip
+     * @return
+     */
+    public String stopVNC(String ip) {
+        try{
+            //创建一个套接字并将其连接到指定主机的指定端口
+            Socket socket = new Socket(ip, port);
+
+            OutputStream outputStream = socket.getOutputStream();//获取一个输出流，向服务器发送信息
+            PrintWriter printWriter = new PrintWriter(outputStream);//将输出流包装成打印流
+            printWriter.print("stop:vnc");
+            printWriter.flush();
+            socket.shutdownOutput();//关闭输出流
+
+            InputStream inputStream = socket.getInputStream();//获取一个输入流，接收服务器的信息
+            byte[] buf = new byte[1024];
+            int len = inputStream.read(buf);
+            String info = new String(buf,0,len);
+            //关闭相对应的资源
+            inputStream.close();
+            printWriter.close();
+            outputStream.close();
+            socket.close();
+            if(info.equals("ok")) {
+                return "ok";
+            } else {
+                return "关闭VNC服务出错！";
+            }
+        } catch (Exception e) {
+            return "向节点发送请求关闭VNC服务时出现异常：" + e.getMessage();
+        }
+    }
+
+    public String getOneFreeExperimentalNode(HttpServletRequest request, String screenSize) {
+        String clientIp = ipService.getIpAddr(request);
+        if (clientIp.equals("") || clientIp == null) {
+            return "未正确获得客户端IP！";
+        } else {
+            String userId = clientIp.substring(clientIp.lastIndexOf(".") + 1, clientIp.length());
+            List<ExperimentalNode> experimentalNodeList = experimentalNodeDao.getNodeByUserId(userId);
+            if (experimentalNodeList == null) {
+                experimentalNodeList = experimentalNodeDao.getFreeNode();
+                if (experimentalNodeList == null) {
+                    return "没有空余的节点，请稍后再次连接！";
+                } else {
+                    ExperimentalNode experimentalNode = experimentalNodeList.get(0);
+                    String ip = experimentalNode.getIp();
+                    String result = this.startVNC(ip, screenSize);
+                    if (result.indexOf("ok:") == 0) {
+                        experimentalNodeDao.increaseNodeUser(ip, userId);
+                    }
+                    return result;
+//                experimentalNodeDao.increaseNodeUser(ip, userId);
+//                return this.startVNC(ip, screenSize);
+                }
+            } else {
+                ExperimentalNode experimentalNode = experimentalNodeList.get(0);
+                String ip = experimentalNode.getIp();
+                experimentalNodeDao.updateNodeTime(ip);
+                return "ok:" + ip;
+            }
+        }
+//        List<ExperimentalNode> experimentalNodeList = experimentalNodeDao.getFreeNode();
+//        if(experimentalNodeList == null) {
+//            return "没有空余的节点，请稍后再次连接！";
+//        } else {
+//            ExperimentalNode experimentalNode = new ExperimentalNode();
+//            experimentalNode = experimentalNodeList.get(0);
+//            String ip = experimentalNode.getIp();
+//            experimentalNodeDao.increaseNodeUser(ip, userId);
+//            return this.startVNC(ip, screenSize);
+//        }
+    }
+
+    public void updateNodeTime(HttpServletRequest request) {
+//        experimentalNodeDao.updateNodeTime(id);
+        String clientIp = ipService.getIpAddr(request);
+        if (!clientIp.equals("") && clientIp != null) {
+            String id = clientIp.substring(clientIp.lastIndexOf(".") + 1, clientIp.length());
+            experimentalNodeDao.updateNodeTimeByUserId(id);
+        }
+    }
+
+
+    /**
+     * 关闭用户所有的vnc
+     * @param userId
+     * @return
+     */
+    public String closeUserVNC(String userId) {
+        List<ExperimentalNode> experimentalNodeList = experimentalNodeDao.getNodeByUserId(userId);
+        if(experimentalNodeList != null) {
+            for(ExperimentalNode experimentalNode : experimentalNodeList) {
+                String result = this.stopVNC(experimentalNode.getIp());
+                if(result.equals("ok")) {
+                    experimentalNodeDao.setUserIdAndTimeMullByIp(experimentalNode.getIp());
+                } else {
+                    return result + " ip:" + experimentalNode.getIp();
+                }
+            }
+        }
+        return "ok";
+    }
+
+    /**
+     * 检查VNCNode是否正在被使用
+     */
+    public void checkVNCNodeUsed() {
+        System.out.println("Being checked...");
+        List<ExperimentalNode> experimentalNodeList = experimentalNodeDao.getNodeByUserIdAndTimeNotNull();
+        if(experimentalNodeList == null) {
+            System.out.println("No vnc node is using...");
+        } else {
+            for (ExperimentalNode experimentalNode : experimentalNodeList) {
+                Timestamp time = experimentalNode.getDatetime();
+                Timestamp nowTime = new Timestamp(System.currentTimeMillis());
+                //判断当前节点用户是否还在使用
+                if(nowTime.getTime() - time.getTime() >= this.closedSeconds * 1000) {
+                    System.out.println(experimentalNode.getIp() + ": is closing...");
+                    String result = this.stopVNC(experimentalNode.getIp());
+                    if(result.equals("ok")) {
+                        experimentalNodeDao.setUserIdAndTimeMullByIp(experimentalNode.getIp());
+                        System.out.println(experimentalNode.getIp() + ": close off success");
+                    } else {
+                        System.out.println(experimentalNode.getIp() + ": failure to shut down");
+                        System.out.println(result);
+                        continue;
+                    }
+                } else {
+                    System.out.println(experimentalNode.getIp() + ": is running...");
+                }
+            }
+        }
+        System.out.println("Check end!");
+    }
+
+    public String selectVNCNode(String ip, String screenSize, HttpServletRequest request) {
+        String clientIp = ipService.getIpAddr(request);
+        if (clientIp.equals("") || clientIp == null) {
+            return "未正确获得客户端IP！";
+        }
+        String userId = clientIp.substring(clientIp.lastIndexOf(".") + 1, clientIp.length());
+        String result = this.closeUserVNC(userId);
+        if(result.equals("ok")) {
+            if(experimentalNodeDao.getNodeCountUserIdNullByIp(ip) == 0) {
+                ExperimentalNode experimentalNode = experimentalNodeDao.getNodeByIp(ip);
+                return experimentalNode.getUserId() + "正在使用节点：" + experimentalNode.getIp();
+            } else {
+                String startResult = this.startVNC(ip, screenSize);
+                if(startResult.indexOf("ok:") == 0) {
+                    experimentalNodeDao.increaseNodeUser(ip, userId);
+                }
+                return startResult;
+            }
+        } else {
+            return result;
+        }
+    }
+
+    public List<ExperimentalNode> getAllExperimentalNode() {
+        List<ExperimentalNode> experimentalNodeList = experimentalNodeDao.getAllNodeOrderByIp();
+        return experimentalNodeList;
+    }
+
+    public String getAllExperimentalNodeToJsonString() {
+        if (experimentalNodeDao.getNodeCount() == 0) {
+            return "暂无实验节点！";
+        } else {
+            List<ExperimentalNode> experimentalNodeList = this.getAllExperimentalNode();
+            if (experimentalNodeList == null) {
+                return "暂无实验节点！";
+            } else {
+                JSONObject jsonObject = new JSONObject();
+                jsonObject.accumulate("experimentalNodeList", experimentalNodeList);
+                return jsonObject.toString();
+            }
+        }
+    }
+}
