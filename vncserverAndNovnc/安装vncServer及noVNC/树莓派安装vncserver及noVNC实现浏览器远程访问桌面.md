@@ -34,31 +34,31 @@ network={
 
 打开VNC-Viewer，在VNC Server中写上要访问树莓派的IP（该树莓派必须安装vncserver并且启动成功）与端口号（5900+启动的控制台号码）。比如按第四部分启动的是1号控制台，那么我的VNC Server内填入IP:5901，如图1-1所示。
 
-<p align="center">![](图片/图1-1.png)</p>
+![](图片/图1-1.png)
 
-<p align="center">图1-1 VNC Viewer连接vncserver
+图1-1 VNC Viewer连接vncserver
 
 连接成功之后如图1-2所示。
 
-<p align="center">![](图片/图1-2.png)</p>
+![](图片/图1-2.png)
 
-<p align="center">图1-2 VNC Viewer连接成功</p>
+图1-2 VNC Viewer连接成功
 
 ## 六、安装noVNC
 
 在确保树莓派联网的情况下，使用```git clone https://github.com/kanaka/noVNC.git```获得noVNC，之后进入noVNC目录，使用```./utils/launch.sh --vnc localhost:5901```（其中./utils/launch.sh根据自己所在的当前目录来决定，一般直接进入noVNC目录之后就开始使用。--vnc之后跟的是要连接的vncserver的IP，之后是端口号，端口号就是vncserver启动时的端口号，见第四部分）。启动之后如图1-3所示。noVNC默认端口是6080，也是浏览器访问时需要使用的端口。启动成功之后，在浏览器中输入http://IP:6080/vnc.html 就可以进入到如图1-4所示页面（其中IP为你要访问的noVNC的IP，端口默认6080，如果修改请使用自己的端口），之后点击Connect，然后输入vncserver设置的密码进行远程访问，成功后的页面如图1-5所示。
 
-<p align="center">![](图片/图1-3.png)</p>
+![](图片/图1-3.png)
 
-<p align="center">图1-3 启动noVNC</p>
+图1-3 启动noVNC
 
-<p align="center">![](图片/图1-4.png)</p>
+![](图片/图1-4.png)
 
-<p align="center">图1-4 使用浏览器访问</p>
+图1-4 使用浏览器访问
 
-<p align="center">![](图片/图1-5.png)</p>
+![](图片/图1-5.png)
 
-<p align="center">图1-5 浏览器远程访问成功</p>
+图1-5 浏览器远程访问成功
 
 ## 七、为noVNC设置默认访问密码
 
@@ -66,9 +66,9 @@ noVNC是一个完整的开元项目，我们可以修改里面的一些代码来
 
 注意：这样做可能会造成安全问题，在具有保密措施的机器中不建议这样做。
 
-<p align="center">![](图片/图1-6.png)</p>
+![](图片/图1-6.png)
 
-<p align="center">图1-6 设置默认访问密码</p>
+图1-6 设置默认访问密码
 
 ## 八、关闭noVNC
 
