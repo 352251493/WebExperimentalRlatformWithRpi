@@ -44,8 +44,8 @@ function selectIPSuccess(data) {
 			// document.getElementById("checkCodeImage").src = "/get_check_code?imageId=" + Math.random();
 			// document.getElementById("userLogin").click();
 		} else {
-			document.getElementById("terminal").contentWindow.location.href = "/experiment/loading_error.html?errorText=" + data;//跳转到错误页面
-			alert(data);
+			document.getElementById("terminal").contentWindow.location.href = "/experiment/loading_error.html?errorText=" + data + "<br/>您可刷新页面重新为您分配IP";//跳转到错误页面
+			alert(data + "\n您可刷新页面重新为您分配IP");
 		}
 	}
 }

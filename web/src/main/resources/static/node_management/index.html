@@ -15,7 +15,7 @@
   <meta name="csrf-token" content="1483780974##87f89328c5616669f00302a263fe9061bb852818">
 	
 		
-      <title>重置密码 - 实验楼</title>
+      <title>节点管理 - 实验楼</title>
 		
 	
 
@@ -129,8 +129,8 @@
                     <a href="" onclick="javascript:gotoExperimentalReport();return false;">实验报告</a>
                     
                 </li>
-                <li class=" new-nav logo-1111">
-                    <a href="" onclick="javascript:gotoNodeManagement();return false;">节点管理</a>
+                <li class=" new-nav logo-1111 active">
+                    <a href="" onclick="javascript:gotoNodeManagement();return false;" class="active">节点管理</a>
                     
                 </li>
                 
@@ -155,57 +155,69 @@
 <div class="container layout layout-margin-top bg-info">
     <br/>
     <br/>
-    <form class="form-horizontal" onsubmit="resetPassword();return false;">
+    <form class="form-horizontal" onsubmit="addUser();return false;">
         <div class="form-group">
             <div class="col-sm-2"></div>
             <div class="col-sm-8">
                 <center>
-                    <h2>重置密码</h2>
+                    <h2>添加用户</h2>
                 </center>
             </div>
         </div>
         <div class="form-group">
             <div class="col-sm-2"></div>
-            <label for="resetPasswordId" class="col-sm-2 control-label">账号</label>
+            <label for="addUserId" class="col-sm-2 control-label">账号</label>
             <div class="col-sm-6">
-                <input type="text" class="form-control" id="resetPasswordId" placeholder="请输入账号" name="resetPasswordId" maxlength="8">
+                <input type="text" class="form-control" id="addUserId" placeholder="请输入账号" name="addUserId" maxlength="8">
+                <p style="color: red;">*账号长度不能超过8位</p>
             </div>
         </div>
         <div class="form-group">
             <div class="col-sm-2"></div>
-            <label for="resetPasswordName" class="col-sm-2 control-label">姓名</label>
+            <label for="addUserName" class="col-sm-2 control-label">姓名</label>
             <div class="col-sm-6">
-                <input type="text" class="form-control col-sm-6" id="resetPasswordName" placeholder="请输入您的姓名" name="resetPasswordName">
+                <input type="text" class="form-control" id="addUserName" placeholder="请输入您的姓名" name="addUserName" maxlength="30">
             </div>
         </div>
         <div class="form-group">
             <div class="col-sm-2"></div>
-            <label for="resetPasswordEmail" class="col-sm-2 control-label">电子邮箱</label>
+            <label class="col-sm-2 control-label">性别</label>
             <div class="col-sm-6">
-                <input type="email" class="form-control col-sm-6" id="resetPasswordEmail" placeholder="请输入您的邮箱" name="resetPasswordEmail">
+                <input type="radio" name="addUserSex" id="addUserSexMan" value="男" checked> 男
+                <br/>
+                <input type="radio" name="addUserSex" id="addUserSexWoman" value="女"> 女
             </div>
         </div>
         <div class="form-group">
             <div class="col-sm-2"></div>
-            <label for="resetPasswordTel" class="col-sm-2 control-label">电话</label>
+            <label for="addUserEmail" class="col-sm-2 control-label">电子邮箱</label>
             <div class="col-sm-6">
-                <input type="tel" class="form-control col-sm-6" id="resetPasswordTel" placeholder="请输入您的电话" name="resetPasswordTel">
+                <input type="email" class="form-control col-sm-6" id="addUserEmail" placeholder="请输入您的邮箱" name="addUserEmail" maxlength="50">
+                <p style="color: red;">*请输入您的真实邮箱，您的邮箱将作为忘记密码时重置密码的重要依据</p>
             </div>
         </div>
         <div class="form-group">
             <div class="col-sm-2"></div>
-            <label for="resetPasswordNewPassword" class="col-sm-2 control-label">新密码</label>
+            <label for="addUserTel" class="col-sm-2 control-label">电话</label>
             <div class="col-sm-6">
-                <input type="password" class="form-control col-sm-6" id="resetPasswordNewPassword" placeholder="请输入新密码" name="resetPasswordNewPassword">
+                <input type="tel" class="form-control col-sm-6" id="addUserTel" placeholder="请输入您的电话" name="addUserTel">
+                <p style="color: red;">*请输入您的真实电话，您的电话将作为忘记密码时重置密码的重要依据</p>
             </div>
         </div>
-        <div class="form-group">
-            <div class="col-sm-2"></div>
-            <label for="resetPasswordRepeatPassword" class="col-sm-2 control-label">确认密码</label>
-            <div class="col-sm-6">
-                <input type="password" class="form-control col-sm-6" id="resetPasswordRepeatPassword" placeholder="请再次输入新密码" name="resetPasswordRepeatPassword">
-            </div>
-        </div>
+        <!--<div class="form-group">-->
+            <!--<div class="col-sm-2"></div>-->
+            <!--<label for="addUserPassword" class="col-sm-2 control-label">密码</label>-->
+            <!--<div class="col-sm-6">-->
+                <!--<input type="password" class="form-control col-sm-6" id="addUserPassword" placeholder="请输入密码" name="addUserPassword">-->
+            <!--</div>-->
+        <!--</div>-->
+        <!--<div class="form-group">-->
+            <!--<div class="col-sm-2"></div>-->
+            <!--<label for="addUserRepeatPassword" class="col-sm-2 control-label">确认密码</label>-->
+            <!--<div class="col-sm-6">-->
+                <!--<input type="password" class="form-control col-sm-6" id="addUserRepeatPassword" placeholder="请再次输入密码" name="addUserRepeatPassword">-->
+            <!--</div>-->
+        <!--</div>-->
         <div class="form-group">
             <div class="col-sm-2"></div>
             <div class="col-sm-offset-2 col-sm-8">

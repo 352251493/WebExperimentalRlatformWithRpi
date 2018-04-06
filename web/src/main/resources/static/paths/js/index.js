@@ -3,6 +3,7 @@
  */
 var releaseExperimentCharacteristic = false;
 var gotoExperimentalReportCharacteristic = false;
+var gotoNodeManagementCharacteristic = false;
 var userName = "";
 
 function getUserInfo() {
@@ -72,6 +73,14 @@ function getUserSuccess(data) {
                     window.location.href="/experimental_report/index.html";
                 } else {
                     alert("抱歉，您的身份是：" + role + "  仅有教师可以查看实验报告！");
+                }
+            }
+            if (gotoNodeManagementCharacteristic) {
+                gotoNodeManagementCharacteristic = false;
+                if(role.indexOf("教师") == 0) {
+                    window.location.href="/node_management/index.html";
+                } else {
+                    alert("抱歉，您的身份是：" + role + "  仅有教师可以进行实验管理！");
                 }
             }
         }
@@ -183,6 +192,7 @@ function keepUserConnectionSuccess(data) {
 
 function releaseExperiment() {
     gotoExperimentalReportCharacteristic = false;
+    gotoNodeManagementCharacteristic = false;
     releaseExperimentCharacteristic = true;
     getUserInfo();
 }
@@ -307,7 +317,15 @@ function teacherGetCoursesTop5Success(data) {
 
 function gotoExperimentalReport() {
     releaseExperimentCharacteristic = false;
+    gotoNodeManagementCharacteristic = false;
     gotoExperimentalReportCharacteristic = true;
+    getUserInfo();
+}
+
+function gotoNodeManagement() {
+    releaseExperimentCharacteristic = false;
+    gotoExperimentalReportCharacteristic = false;
+    gotoNodeManagementCharacteristic = true;
     getUserInfo();
 }
 

@@ -7,6 +7,7 @@ var showExperimentalInformationCharacteristic = false;
 var showExperimentalInformationExperimentalId;
 var startExperimentalCharacteristic = false;
 var gotoExperimentalReportCharacteristic = false;
+var gotoNodeManagementCharacteristic = false;
 var userName = "";
 
 function getUserInfo() {
@@ -105,10 +106,20 @@ function getUserSuccess(data) {
             }
         }
         if (gotoExperimentalReportCharacteristic) {
+            gotoExperimentalReportCharacteristic = false;
             if(role.indexOf("教师") == 0) {
                 window.location.href="/experimental_report/index.html";
             } else {
                 alert("抱歉，您的身份是：" + role + "  仅有教师可以查看实验报告！");
+            }
+        }
+        
+        if (gotoNodeManagementCharacteristic) {
+            gotoNodeManagementCharacteristic = false;
+            if(role.indexOf("教师") == 0) {
+                window.location.href="/node_management/index.html";
+            } else {
+                alert("抱歉，您的身份是：" + role + "  仅有教师可以进行节点管理！");
             }
         }
         setInterval(keepUserConnection, 60000);
@@ -221,6 +232,7 @@ function releaseExperiment() {
     showExperimentalInformationCharacteristic = false;
     startExperimentalCharacteristic = false;
     gotoExperimentalReportCharacteristic = false;
+    gotoNodeManagementCharacteristic = false;
     releaseExperimentCharacteristic = true;
     getUserInfo();
 }
@@ -272,6 +284,7 @@ function showExperimentalInformation(experimentalId) {
     releaseExperimentCharacteristic = false;
     startExperimentalCharacteristic = false;
     gotoExperimentalReportCharacteristic = false;
+    gotoNodeManagementCharacteristic = false;
     showExperimentalInformationCharacteristic = true;
     showExperimentalInformationExperimentalId = experimentalId;
     getUserInfo();
@@ -281,6 +294,7 @@ function startExperimental(experimentalId) {
     releaseExperimentCharacteristic = false;
     showExperimentalInformationCharacteristic = false;
     gotoExperimentalReportCharacteristic = false;
+    gotoNodeManagementCharacteristic = false;
     startExperimentalCharacteristic = true;
     showExperimentalInformationExperimentalId = experimentalId;
     getUserInfo();
@@ -367,7 +381,17 @@ function gotoExperimentalReport() {
     releaseExperimentCharacteristic = false;
     startExperimentalCharacteristic = false;
     showExperimentalInformationCharacteristic = false;
+    gotoNodeManagementCharacteristic = false;
     gotoExperimentalReportCharacteristic = true;
+    getUserInfo();
+}
+
+function gotoNodeManagement() {
+    releaseExperimentCharacteristic = false;
+    startExperimentalCharacteristic = false;
+    showExperimentalInformationCharacteristic = false;
+    gotoExperimentalReportCharacteristic = false;
+    gotoNodeManagementCharacteristic = true;
     getUserInfo();
 }
 

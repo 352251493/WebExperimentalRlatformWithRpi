@@ -16,6 +16,7 @@ public class ExperimentalNode {
     private String ip;//实验节点ip
     private String userId;//用户id
     private Timestamp datetime;//用户使用的时间
+    private String status;
 
     public String getIp() {
         return ip;
@@ -41,12 +42,21 @@ public class ExperimentalNode {
         this.datetime = datetime;
     }
 
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
     @Override
     public String toString() {
         JSONObject jsonObject = new JSONObject();
         jsonObject.accumulate("ip", this.ip);
         jsonObject.accumulate("userId", this.userId);
         jsonObject.accumulate("datetime", this.datetime);
+        jsonObject.accumulate("status", this.status);
         return jsonObject.toString();
     }
 }

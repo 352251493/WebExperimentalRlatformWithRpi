@@ -4,6 +4,7 @@ import com.gxg.entities.User;
 import com.gxg.services.VNCService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -97,5 +98,16 @@ public class VNCController {
             session.setAttribute("user", user);
         }
         return vncService.getAllExperimentalNodeToJsonString();
+    }
+
+    @PostMapping(value = "/get_all_available_experimental_node")
+    @ResponseBody
+    public String getAllAvailableExperimentalNode(HttpServletRequest request) {
+        HttpSession session = request.getSession();
+        if (session.getAttribute("user") != null) {
+            User user = (User)session.getAttribute("user");
+            session.setAttribute("user", user);
+        }
+        return vncService.getAllAvailableExperimentalNodeToJsonString(request);
     }
 }

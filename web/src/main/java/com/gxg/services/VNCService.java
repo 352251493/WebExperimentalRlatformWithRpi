@@ -61,10 +61,22 @@ public class VNCService {
             if(info.equals("ok")) {
                 return "ok:" + ip;
             } else {
-                return "开启VNC服务出错！";
+                try {
+                    experimentalNodeDao.updateStatusByIp(ip, "错误");
+                } catch (Exception e) {
+                    e.printStackTrace();
+                } finally {
+                    return "开启VNC服务出错！";
+                }
             }
         } catch (Exception e) {
-            return "向节点发送请求开启VNC服务时出现异常：" + e.getMessage();
+            try {
+                experimentalNodeDao.updateStatusByIp(ip, "错误");
+            } catch (Exception e2) {
+                e2.printStackTrace();
+            } finally {
+                return "向节点发送请求开启VNC服务时出现异常：" + e.getMessage();
+            }
         }
 
     }
@@ -97,10 +109,22 @@ public class VNCService {
             if(info.equals("ok")) {
                 return "ok";
             } else {
-                return "关闭VNC服务出错！";
+                try {
+                    experimentalNodeDao.updateStatusByIp(ip, "错误");
+                } catch (Exception e) {
+                    e.printStackTrace();
+                } finally {
+                    return "关闭VNC服务出错！";
+                }
             }
         } catch (Exception e) {
-            return "向节点发送请求关闭VNC服务时出现异常：" + e.getMessage();
+            try {
+                experimentalNodeDao.updateStatusByIp(ip, "错误");
+            } catch (Exception e2) {
+                e2.printStackTrace();
+            } finally {
+                return "向节点发送请求关闭VNC服务时出现异常：" + e.getMessage();
+            }
         }
     }
 
@@ -112,25 +136,38 @@ public class VNCService {
             String userId = clientIp.substring(clientIp.lastIndexOf(".") + 1, clientIp.length());
             List<ExperimentalNode> experimentalNodeList = experimentalNodeDao.getNodeByUserId(userId);
             if (experimentalNodeList == null) {
-                experimentalNodeList = experimentalNodeDao.getFreeNode();
-                if (experimentalNodeList == null) {
-                    return "没有空余的节点，请稍后再次连接！";
-                } else {
-                    ExperimentalNode experimentalNode = experimentalNodeList.get(0);
-                    String ip = experimentalNode.getIp();
-                    String result = this.startVNC(ip, screenSize);
-                    if (result.indexOf("ok:") == 0) {
-                        experimentalNodeDao.increaseNodeUser(ip, userId);
-                    }
-                    return result;
+                synchronized (this) {
+                    experimentalNodeList = experimentalNodeDao.getFreeNode();
+                    if (experimentalNodeList == null) {
+                        return "没有空余的节点，请稍后再次连接！";
+                    } else {
+                        ExperimentalNode experimentalNode = experimentalNodeList.get(0);
+                        String ip = experimentalNode.getIp();
+                        String result = this.startVNC(ip, screenSize);
+                        if (result.indexOf("ok:") == 0) {
+                            try {
+                                experimentalNodeDao.increaseNodeUser(ip, userId);
+                            } catch (Exception e) {
+                                this.stopVNC(ip);
+                                return "操作打开vnc服务时数据库出错！";
+                            }
+                            return result;
+                        }
+                        return result;
 //                experimentalNodeDao.increaseNodeUser(ip, userId);
 //                return this.startVNC(ip, screenSize);
+                    }
                 }
             } else {
                 ExperimentalNode experimentalNode = experimentalNodeList.get(0);
                 String ip = experimentalNode.getIp();
-                experimentalNodeDao.updateNodeTime(ip);
-                return "ok:" + ip;
+                try {
+                    experimentalNodeDao.updateNodeTime(ip);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                } finally {
+                    return "ok:" + ip;
+                }
             }
         }
 //        List<ExperimentalNode> experimentalNodeList = experimentalNodeDao.getFreeNode();
@@ -150,7 +187,11 @@ public class VNCService {
         String clientIp = ipService.getIpAddr(request);
         if (!clientIp.equals("") && clientIp != null) {
             String id = clientIp.substring(clientIp.lastIndexOf(".") + 1, clientIp.length());
-            experimentalNodeDao.updateNodeTimeByUserId(id);
+            try {
+                experimentalNodeDao.updateNodeTimeByUserId(id);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -166,7 +207,19 @@ public class VNCService {
             for(ExperimentalNode experimentalNode : experimentalNodeList) {
                 String result = this.stopVNC(experimentalNode.getIp());
                 if(result.equals("ok")) {
-                    experimentalNodeDao.setUserIdAndTimeMullByIp(experimentalNode.getIp());
+                    try {
+                        experimentalNodeDao.setUserIdAndTimeNullByIp(experimentalNode.getIp());
+                        return "ok";
+                    } catch (Exception e) {
+                        System.out.println(e.getMessage());
+                        try {
+                            experimentalNodeDao.updateStatusByIp(experimentalNode.getIp(), "错误");
+                        } catch (Exception e2) {
+                            e2.printStackTrace();
+                        } finally {
+                            return "操作数据库出错：" + e.getMessage();
+                        }
+                    }
                 } else {
                     return result + " ip:" + experimentalNode.getIp();
                 }
@@ -192,12 +245,27 @@ public class VNCService {
                     System.out.println(experimentalNode.getIp() + ": is closing...");
                     String result = this.stopVNC(experimentalNode.getIp());
                     if(result.equals("ok")) {
-                        experimentalNodeDao.setUserIdAndTimeMullByIp(experimentalNode.getIp());
-                        System.out.println(experimentalNode.getIp() + ": close off success");
+                        try {
+                            experimentalNodeDao.setUserIdAndTimeNullByIp(experimentalNode.getIp());
+                            System.out.println(experimentalNode.getIp() + ": close off success");
+                        } catch (Exception e) {
+                            try {
+                                experimentalNodeDao.updateStatusByIp(experimentalNode.getIp(), "错误");
+                            } catch (Exception e2) {
+                                e2.printStackTrace();
+                            }
+                            e.printStackTrace();
+                        }
                     } else {
                         System.out.println(experimentalNode.getIp() + ": failure to shut down");
                         System.out.println(result);
-                        continue;
+                        try {
+                            experimentalNodeDao.updateStatusByIp(experimentalNode.getIp(), "错误");
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        } finally {
+                            continue;
+                        }
                     }
                 } else {
                     System.out.println(experimentalNode.getIp() + ": is running...");
@@ -215,15 +283,22 @@ public class VNCService {
         String userId = clientIp.substring(clientIp.lastIndexOf(".") + 1, clientIp.length());
         String result = this.closeUserVNC(userId);
         if(result.equals("ok")) {
-            if(experimentalNodeDao.getNodeCountUserIdNullByIp(ip) == 0) {
-                ExperimentalNode experimentalNode = experimentalNodeDao.getNodeByIp(ip);
-                return experimentalNode.getUserId() + "正在使用节点：" + experimentalNode.getIp();
-            } else {
-                String startResult = this.startVNC(ip, screenSize);
-                if(startResult.indexOf("ok:") == 0) {
-                    experimentalNodeDao.increaseNodeUser(ip, userId);
+            synchronized (this) {
+                if (experimentalNodeDao.getNodeCountUserIdNullByIp(ip) == 0) {
+                    ExperimentalNode experimentalNode = experimentalNodeDao.getNodeByIp(ip);
+                    return experimentalNode.getUserId() + "正在使用节点：" + experimentalNode.getIp();
+                } else {
+                    String startResult = this.startVNC(ip, screenSize);
+                    if (startResult.indexOf("ok:") == 0) {
+                        try {
+                            experimentalNodeDao.increaseNodeUser(ip, userId);
+                        } catch (Exception e) {
+                            this.stopVNC(ip);
+                            return "开启VNC服务时操作数据库失败！";
+                        }
+                    }
+                    return startResult;
                 }
-                return startResult;
             }
         } else {
             return result;
@@ -246,6 +321,27 @@ public class VNCService {
                 JSONObject jsonObject = new JSONObject();
                 jsonObject.accumulate("experimentalNodeList", experimentalNodeList);
                 return jsonObject.toString();
+            }
+        }
+    }
+
+    public String getAllAvailableExperimentalNodeToJsonString(HttpServletRequest request) {
+        String clientIp = ipService.getIpAddr(request);
+        if (clientIp.equals("") || clientIp == null) {
+            return "未正确获得客户端IP！";
+        } else {
+            String userId = clientIp.substring(clientIp.lastIndexOf(".") + 1, clientIp.length());
+            if (experimentalNodeDao.getAvailableNodeCountByUserId(userId) == 0) {
+                return "暂无实验节点！";
+            } else {
+                List<ExperimentalNode> experimentalNodeList = experimentalNodeDao.getAvailableNodeByUserIdOrderByIp(userId);
+                if (experimentalNodeList == null) {
+                    return "暂无实验节点！";
+                } else {
+                    JSONObject jsonObject = new JSONObject();
+                    jsonObject.accumulate("experimentalNodeList", experimentalNodeList);
+                    return jsonObject.toString();
+                }
             }
         }
     }

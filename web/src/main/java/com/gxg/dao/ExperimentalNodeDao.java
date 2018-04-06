@@ -29,7 +29,7 @@ public class ExperimentalNodeDao {
         if(this.getFreeNodeCount() == 0) {
             return null;
         }
-        String sql = "select * from ExperimentalNode where userId is null and time is null";
+        String sql = "select * from ExperimentalNode where userId is null and time is null and status='正常'";
 
         List<ExperimentalNode> experimentalNodeList = jdbcTemplate.query(sql, new RowMapper<ExperimentalNode>() {
             @Override
@@ -50,7 +50,7 @@ public class ExperimentalNodeDao {
      * 获得空闲节点的个数
      */
     public int getFreeNodeCount() {
-        String sql = "select count(*) from ExperimentalNode where userId is null and time is null";
+        String sql = "select count(*) from ExperimentalNode where userId is null and time is null and status='正常'";
         int rowCount = this.jdbcTemplate.queryForObject(sql, Integer.class);
         return rowCount;
     }
@@ -92,7 +92,7 @@ public class ExperimentalNodeDao {
      */
     public int getNodeCountByUserId(String userId) {
 
-        String sql = "select count(*) from ExperimentalNode where userId=?";
+        String sql = "select count(*) from ExperimentalNode where userId=? and status='正常'";
         int rowCount = this.jdbcTemplate.queryForObject(sql, Integer.class, userId);
         return rowCount;
     }
@@ -107,7 +107,7 @@ public class ExperimentalNodeDao {
         if(this.getNodeCountByUserId(userId) == 0) {
             return null;
         } else {
-            String sql = "select * from ExperimentalNode where userId=?";
+            String sql = "select * from ExperimentalNode where userId=? and status='正常'";
             List<ExperimentalNode> experimentalNodeList = jdbcTemplate.query(sql, new RowMapper<ExperimentalNode>() {
                 @Override
                 public ExperimentalNode mapRow(ResultSet resultSet, int i) throws SQLException {
@@ -115,7 +115,7 @@ public class ExperimentalNodeDao {
                     experimentalNode.setIp(resultSet.getString("ip"));
                     experimentalNode.setUserId(resultSet.getString("userId"));
                     experimentalNode.setDatetime(resultSet.getTimestamp("time"));
-
+                    experimentalNode.setStatus(resultSet.getString("status"));
                     return experimentalNode;
                 }
             }, userId);
@@ -128,8 +128,8 @@ public class ExperimentalNodeDao {
      * 通过ip将UserId和Time设置为空
      * @param ip
      */
-    public void setUserIdAndTimeMullByIp(String ip) {
-        String sql = "update ExperimentalNode set userId=null, time=null where ip=?";
+    public void setUserIdAndTimeNullByIp(String ip) {
+        String sql = "update ExperimentalNode set userId=null, time=null, status='正常' where ip=?";
         jdbcTemplate.update(sql, ip);
     }
 
@@ -139,7 +139,7 @@ public class ExperimentalNodeDao {
      */
     public int getNodeCountByUserIdAndTimeNotNull() {
 
-        String sql = "select count(*) from ExperimentalNode where userId is not null and time is not null";
+        String sql = "select count(*) from ExperimentalNode where userId is not null and time is not null and status='正常'";
         int rowCount = this.jdbcTemplate.queryForObject(sql, Integer.class);
         return rowCount;
     }
@@ -152,7 +152,7 @@ public class ExperimentalNodeDao {
         if(getNodeCountByUserIdAndTimeNotNull() == 0) {
             return null;
         } else {
-            String sql = "select * from ExperimentalNode where userId is not null and time is not null";
+            String sql = "select * from ExperimentalNode where userId is not null and time is not null and status='正常'";
             List<ExperimentalNode> experimentalNodeList = jdbcTemplate.query(sql, new RowMapper<ExperimentalNode>() {
                 @Override
                 public ExperimentalNode mapRow(ResultSet resultSet, int i) throws SQLException {
@@ -161,6 +161,7 @@ public class ExperimentalNodeDao {
                     experimentalNode.setIp(resultSet.getString("ip"));
                     experimentalNode.setUserId(resultSet.getString("userId"));
                     experimentalNode.setDatetime(resultSet.getTimestamp("time"));
+                    experimentalNode.setStatus(resultSet.getString("status"));
                     return experimentalNode;
                 }
             });
@@ -174,7 +175,7 @@ public class ExperimentalNodeDao {
      * @return
      */
     public int getNodeCountUserIdNullByIp(String ip) {
-        String sql = "select count(*) from ExperimentalNode where ip=? and userId is null";
+        String sql = "select count(*) from ExperimentalNode where ip=? and userId is null and status='正常'";
         int rowCount = this.jdbcTemplate.queryForObject(sql, Integer.class, ip);
         return rowCount;
     }
@@ -194,6 +195,7 @@ public class ExperimentalNodeDao {
                 experimentalNode.setIp(resultSet.getString("ip"));
                 experimentalNode.setUserId(resultSet.getString("userId"));
                 experimentalNode.setDatetime(resultSet.getTimestamp("time"));
+                experimentalNode.setStatus(resultSet.getString("status"));
                 return experimentalNode;
             }
         }, ip);
@@ -202,7 +204,7 @@ public class ExperimentalNodeDao {
 
 
     public void setUserIdAndTimeNull() {
-        String sql = "update ExperimentalNode set userId=null, time=null";
+        String sql = "update ExperimentalNode set userId=null, time=null, status='正常'";
         jdbcTemplate.update(sql);
     }
 
@@ -224,9 +226,41 @@ public class ExperimentalNodeDao {
                     experimentalNode.setIp(resultSet.getString("ip"));
                     experimentalNode.setUserId(resultSet.getString("userId"));
                     experimentalNode.setDatetime(resultSet.getTimestamp("time"));
+                    experimentalNode.setStatus(resultSet.getString("status"));
                     return experimentalNode;
                 }
             });
+            return experimentalNodeList;
+        }
+    }
+
+    public void updateStatusByIp(String ip, String status) {
+        String sql = "update ExperimentalNode set status=? where ip=?";
+        jdbcTemplate.update(sql, status, ip);
+    }
+
+    public int getAvailableNodeCountByUserId(String userId) {
+        String sql = "select count(*) from ExperimentalNode where (userId=? and status='正常') or (userId is null and time is null and status='正常')";
+        int rowCount = this.jdbcTemplate.queryForObject(sql, Integer.class, userId);
+        return rowCount;
+    }
+
+    public List<ExperimentalNode> getAvailableNodeByUserIdOrderByIp(String userId) {
+        if(this.getAvailableNodeCountByUserId(userId) == 0) {
+            return null;
+        } else {
+            String sql = "select * from ExperimentalNode where (userId=? and status='正常') or (userId is null and time is null and status='正常') order by ip";
+            List<ExperimentalNode> experimentalNodeList = jdbcTemplate.query(sql, new RowMapper<ExperimentalNode>() {
+                @Override
+                public ExperimentalNode mapRow(ResultSet resultSet, int i) throws SQLException {
+                    ExperimentalNode experimentalNode = new ExperimentalNode();
+                    experimentalNode.setIp(resultSet.getString("ip"));
+                    experimentalNode.setUserId(resultSet.getString("userId"));
+                    experimentalNode.setDatetime(resultSet.getTimestamp("time"));
+                    experimentalNode.setStatus(resultSet.getString("status"));
+                    return experimentalNode;
+                }
+            }, userId);
             return experimentalNodeList;
         }
     }

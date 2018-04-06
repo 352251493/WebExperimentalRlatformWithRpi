@@ -4,6 +4,7 @@
 var userName = "";
 var releaseExperimentCharacteristic = false;
 var gotoExperimentalReportCharacteristic = false;
+var gotoNodeManagementCharacteristic = false;
 var isFirst = true;
 function getUserInfo() {
 	$.ajax({
@@ -22,7 +23,7 @@ function getUserInfo() {
 
 function getUserSuccess(data) {
 	if(data.indexOf("error:") != -1) {
-		if (releaseExperimentCharacteristic || gotoExperimentalReportCharacteristic) {
+		if (releaseExperimentCharacteristic || gotoExperimentalReportCharacteristic || gotoNodeManagementCharacteristic) {
 			document.getElementById("checkCodeImage").src = "/get_check_code?imageId=" + Math.random();
 			document.getElementById("userLogin").click();
 		}
@@ -79,6 +80,14 @@ function getUserSuccess(data) {
 					alert("抱歉，您的身份是：" + role + "  仅有教师可以查看实验报告！");
 				}
 			}
+			if (gotoNodeManagementCharacteristic) {
+				gotoNodeManagementCharacteristic = false;
+				if(role.indexOf("教师") == 0) {
+					window.location.href="/node_management/index.html";
+				} else {
+					alert("抱歉，您的身份是：" + role + "  仅有教师可以进行节点管理！");
+				}
+			}
 		}
 		// setInterval(keepVNCConnection, 10000);
 		// getExperimentalNode();
@@ -89,14 +98,14 @@ function getUserSuccess(data) {
 		isFirst = false;
 		setInterval(keepVNCConnection, 10000);
 		getExperimentalNode();
-		getVNCNode();
+		setInterval("checkExperimentalNode()", 1000);
 	}
 	return false;
 }
 
 function getExperimentalNode() {
 	$.ajax({
-		url: "/get_all_experimental_node",
+		url: "/get_all_available_experimental_node",
 		type: "POST",
 		cache: false,//设置不缓存
 		success: getExperimentalNodeSuccess,
@@ -112,14 +121,20 @@ function getExperimentalNodeSuccess(data) {
 	if (data.indexOf("暂无实验节点！") == 0) {
 		document.getElementById("experimentalIp").innerHTML = "<li><a class=\"\" href=\"\">" + data + "</a></li>";
 	} else {
-		var str = "";
-		var obj = JSON.parse(data);
-		var experimentalNodeList = obj['experimentalNodeList'];
-		for (var i = 0; i < experimentalNodeList.length; i++) {
-			str += "<li><a class=\"\" href=\"\" onclick=\"javascript:selectIP('ip-" + experimentalNodeList[i].ip.split(".")[3] + "'); return false;\" id=\"ip-" + experimentalNodeList[i].ip.split(".")[3] + "\">" + experimentalNodeList[i].ip + "</a></li>";
+		if (data.indexOf("未正确获得客户端IP！") == 0) {
+			alert(data);
+			window.location.href = "/courses/index.html";
+		} else {
+			var str = "";
+			var obj = JSON.parse(data);
+			var experimentalNodeList = obj['experimentalNodeList'];
+			for (var i = 0; i < experimentalNodeList.length; i++) {
+				str += "<li><a class=\"\" href=\"\" onclick=\"javascript:selectIP('ip-" + experimentalNodeList[i].ip.split(".")[3] + "'); return false;\" id=\"ip-" + experimentalNodeList[i].ip.split(".")[3] + "\">" + experimentalNodeList[i].ip + "</a></li>";
+			}
+			document.getElementById("experimentalIp").innerHTML = str;
 		}
-		document.getElementById("experimentalIp").innerHTML = str;
 	}
+	getVNCNode();
 	getCourseInformation();
 }
 
@@ -243,8 +258,14 @@ function getVNCNodeSuccess(data) {
 			// document.getElementById("checkCodeImage").src = "/get_check_code?imageId=" + Math.random();
 			// document.getElementById("userLogin").click();
 		} else {
-			document.getElementById("terminal").contentWindow.location.href = "/experiment/loading_error.html?errorText=" + data;//跳转到错误页面
-			alert(data);
+			if (data.indexOf("未正确获得客户端IP！") == 0 || data.indexOf("没有空余的节点，请稍后再次连接！") == 0 || data.indexOf("操作打开vnc服务时数据库出错！") == 0) {
+				document.getElementById("terminal").contentWindow.location.href = "/experiment/loading_error.html?errorText=" + data;//跳转到错误页面
+				alert(data);
+			} else {
+				document.getElementById("terminal").contentWindow.location.href = "/experiment/loading_error.html?errorText=" + data + "<br/>将继续寻找下一个可用节点！";//跳转到错误页面
+				alert(data + "\n将继续寻找下一个可用节点！");
+				getVNCNode();
+			}
 		}
 	}
 }
@@ -275,6 +296,7 @@ function keepVNCConnectionSuccess(data) {
 
 function releaseExperiment() {
 	gotoExperimentalReportCharacteristic = false;
+	gotoNodeManagementCharacteristic = false;
 	releaseExperimentCharacteristic = true;
 	getUserInfo();
 }
@@ -483,7 +505,58 @@ function teacherGetCoursesTop5Success(data) {
 
 function gotoExperimentalReport() {
 	releaseExperimentCharacteristic = false;
+	gotoNodeManagementCharacteristic = false;
 	gotoExperimentalReportCharacteristic = true;
+	getUserInfo();
+}
+
+function checkExperimentalNode() {
+	$.ajax({
+		url: "/get_all_available_experimental_node",
+		type: "POST",
+		cache: false,//设置不缓存
+		success: checkExperimentalNodeSuccess,
+		error: function (XMLHttpRequest, textStatus, errorThrown) {
+			alert(XMLHttpRequest.status);
+			alert(XMLHttpRequest.readyState);
+			alert(textStatus);
+		}
+	});
+}
+
+function checkExperimentalNodeSuccess(data) {
+	if (data.indexOf("暂无实验节点！") == 0) {
+		document.getElementById("experimentalIp").innerHTML = "<li><a class=\"\" href=\"\">" + data + "</a></li>";
+	} else {
+		if (data.indexOf("未正确获得客户端IP！") != 0) {
+			var activeId = "";
+			var activeLink = document.getElementsByClassName("active");//获取class为active的对象
+			for (var i = 0;i < activeLink.length ;i++) {
+				var link = activeLink[i];
+				if (link.id.indexOf("ip-") != -1) {
+					activeId = link.id;
+					break;
+				}
+			}
+			var str = "";
+			var obj = JSON.parse(data);
+			var experimentalNodeList = obj['experimentalNodeList'];
+			for (var i = 0; i < experimentalNodeList.length; i++) {
+				str += "<li><a class=\"\" href=\"\" onclick=\"javascript:selectIP('ip-" + experimentalNodeList[i].ip.split(".")[3] + "'); return false;\" id=\"ip-" + experimentalNodeList[i].ip.split(".")[3] + "\">" + experimentalNodeList[i].ip + "</a></li>";
+			}
+			document.getElementById("experimentalIp").innerHTML = str;
+			if (activeId != "") {
+				var selectNode = document.getElementById(activeId);//获取点击的节点
+				selectNode.className = "active";
+			}
+		}
+	}
+}
+
+function gotoNodeManagement() {
+	releaseExperimentCharacteristic = false;
+	gotoExperimentalReportCharacteristic = false;
+	gotoNodeManagementCharacteristic = true;
 	getUserInfo();
 }
 
