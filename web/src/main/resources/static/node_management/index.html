@@ -155,79 +155,29 @@
 <div class="container layout layout-margin-top bg-info">
     <br/>
     <br/>
-    <form class="form-horizontal" onsubmit="addUser();return false;">
-        <div class="form-group">
-            <div class="col-sm-2"></div>
-            <div class="col-sm-8">
-                <center>
-                    <h2>添加用户</h2>
-                </center>
-            </div>
+    <h2 align="center">节点管理&nbsp;&nbsp;&nbsp;&nbsp;<span class="glyphicon glyphicon-plus"></span></h2>
+        <div class="table-responsive" id="nodeInformation">
+            正在加载，请稍后...
+            <!--<table class="table table-striped">-->
+                <!--<tr>-->
+                    <!--<td class="active" align="center"><b>节点IP</b></td>-->
+                    <!--<td class="success" align="center"><b>使用时间</b></td>-->
+                    <!--<td class="warning" align="center"><b>使用IP</b></td>-->
+                    <!--<td class="danger" align="center"><b>状态</b></td>-->
+                    <!--<td class="active" align="center"><b>操作</b></td>-->
+                <!--</tr>-->
+                <!--<tr>-->
+                    <!--<td class="active" align="center">192.168.1.102</td>-->
+                    <!--<td class="success" align="center">2018-04-07 16:28:35</td>-->
+                    <!--<td class="warning" align="center">92</td>-->
+                    <!--<td class="danger" align="center"><span style="color: green">正常</span></td>-->
+                    <!--<td class="active" align="center">-->
+                        <!--<button type="button" class="btn btn-warning">错误</button>-->
+                        <!--<button type="button" class="btn btn-danger">删除</button>-->
+                    <!--</td>-->
+                <!--</tr>-->
+            <!--</table>-->
         </div>
-        <div class="form-group">
-            <div class="col-sm-2"></div>
-            <label for="addUserId" class="col-sm-2 control-label">账号</label>
-            <div class="col-sm-6">
-                <input type="text" class="form-control" id="addUserId" placeholder="请输入账号" name="addUserId" maxlength="8">
-                <p style="color: red;">*账号长度不能超过8位</p>
-            </div>
-        </div>
-        <div class="form-group">
-            <div class="col-sm-2"></div>
-            <label for="addUserName" class="col-sm-2 control-label">姓名</label>
-            <div class="col-sm-6">
-                <input type="text" class="form-control" id="addUserName" placeholder="请输入您的姓名" name="addUserName" maxlength="30">
-            </div>
-        </div>
-        <div class="form-group">
-            <div class="col-sm-2"></div>
-            <label class="col-sm-2 control-label">性别</label>
-            <div class="col-sm-6">
-                <input type="radio" name="addUserSex" id="addUserSexMan" value="男" checked> 男
-                <br/>
-                <input type="radio" name="addUserSex" id="addUserSexWoman" value="女"> 女
-            </div>
-        </div>
-        <div class="form-group">
-            <div class="col-sm-2"></div>
-            <label for="addUserEmail" class="col-sm-2 control-label">电子邮箱</label>
-            <div class="col-sm-6">
-                <input type="email" class="form-control col-sm-6" id="addUserEmail" placeholder="请输入您的邮箱" name="addUserEmail" maxlength="50">
-                <p style="color: red;">*请输入您的真实邮箱，您的邮箱将作为忘记密码时重置密码的重要依据</p>
-            </div>
-        </div>
-        <div class="form-group">
-            <div class="col-sm-2"></div>
-            <label for="addUserTel" class="col-sm-2 control-label">电话</label>
-            <div class="col-sm-6">
-                <input type="tel" class="form-control col-sm-6" id="addUserTel" placeholder="请输入您的电话" name="addUserTel">
-                <p style="color: red;">*请输入您的真实电话，您的电话将作为忘记密码时重置密码的重要依据</p>
-            </div>
-        </div>
-        <!--<div class="form-group">-->
-            <!--<div class="col-sm-2"></div>-->
-            <!--<label for="addUserPassword" class="col-sm-2 control-label">密码</label>-->
-            <!--<div class="col-sm-6">-->
-                <!--<input type="password" class="form-control col-sm-6" id="addUserPassword" placeholder="请输入密码" name="addUserPassword">-->
-            <!--</div>-->
-        <!--</div>-->
-        <!--<div class="form-group">-->
-            <!--<div class="col-sm-2"></div>-->
-            <!--<label for="addUserRepeatPassword" class="col-sm-2 control-label">确认密码</label>-->
-            <!--<div class="col-sm-6">-->
-                <!--<input type="password" class="form-control col-sm-6" id="addUserRepeatPassword" placeholder="请再次输入密码" name="addUserRepeatPassword">-->
-            <!--</div>-->
-        <!--</div>-->
-        <div class="form-group">
-            <div class="col-sm-2"></div>
-            <div class="col-sm-offset-2 col-sm-8">
-                <button type="submit" class="btn btn-success">确认</button>
-                <input type="reset" class="btn btn-info" value="重填">
-            </div>
-        </div>
-    </form>
-    
-    
     <!--<div class="row">-->
         <!--<div class="col-md-9 layout-body">-->
 
@@ -878,5 +828,6 @@
 <script src="../app/dest/base/index.js?=2016121272249"></script>
 
 <script src="js/index.js"></script>
+<script src="js/index2.js"></script>
 </body>
 </html>
