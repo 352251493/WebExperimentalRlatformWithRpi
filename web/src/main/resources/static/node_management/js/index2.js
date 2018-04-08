@@ -52,9 +52,9 @@ function getNodeInformationSuccess(data) {
             }
             str += "<td class=\"active\" align=\"center\">\n";
             if (experimentalNode.status.indexOf("正常") == 0) {
-                str += "<button type=\"button\" class=\"btn btn-warning\">错误</button>\n";
+                str += "<button type=\"button\" class=\"btn btn-warning\" onclick=\"changeNodeStatus('" + experimentalNode.ip + "', '错误')\">错误</button>\n";
             } else {
-                str += "<button type=\"button\" class=\"btn btn-success\">正常</button>\n";
+                str += "<button type=\"button\" class=\"btn btn-success\" onclick=\"changeNodeStatus('" + experimentalNode.ip + "', '正常')\">正常</button>\n";
             }
             str += "<button type=\"button\" class=\"btn btn-danger\">删除</button>\n";
             str += "</td>";
@@ -62,6 +62,54 @@ function getNodeInformationSuccess(data) {
         }
         str += "</table>";
         document.getElementById("nodeInformation").innerHTML = str;
+    }
+}
+
+function changeNodeStatus(ip, status) {
+    var yes = false;
+    if (status == "正常") {
+        yes = confirm("确定设置为正常？如果该节点服务没有正常启动，则仍无法使用，请您确保该实验节点服务已经正常，或该节点已经重启！");
+    } else {
+        if (status == "错误") {
+            yes = confirm("确定设为错误？设为错误后该节点将不能作为实验节点使用！");
+        } else {
+            yes = false;
+        }
+    }
+    if (yes) {
+        var obj = new Object();
+        obj.ip = ip;
+        obj.status = status;
+        $.ajax({
+            url: "/change_node_status",
+            type: "POST",
+            cache: false,//设置不缓存
+            data: obj,
+            success: changeNodeStatusSuccess,
+            error: function (XMLHttpRequest, textStatus, errorThrown) {
+                alert(XMLHttpRequest.status);
+                alert(XMLHttpRequest.readyState);
+                alert(textStatus);
+            }
+        });
+    }
+}
+
+function changeNodeStatusSuccess(data) {
+    if (data.indexOf("ok") == 0) {
+        alert("设置成功！");
+        window.location.reload();
+    } else {
+        if (data.indexOf("没有用户！") == 0) {
+            window.location.href = "/index.html";
+        } else {
+            if (data.indexOf("抱歉，您的身份是") == 0) {
+                alert(data);
+                window.location.href = "/index.html";
+            } else {
+                alert(data);
+            }
+        }
     }
 }
 

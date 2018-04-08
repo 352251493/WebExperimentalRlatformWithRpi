@@ -110,4 +110,17 @@ public class VNCController {
         }
         return vncService.getAllAvailableExperimentalNodeToJsonString(request);
     }
+
+    @PostMapping(value = "/change_node_status")
+    @ResponseBody
+    public String changeNodeStatus(@RequestParam("ip") String ip, @RequestParam("status") String status, HttpServletRequest request) {
+        HttpSession session = request.getSession();
+        if (session.getAttribute("user") != null) {
+            User user = (User)session.getAttribute("user");
+            session.setAttribute("user", user);
+            return vncService.changeNodeStatus(ip, status, user);
+        } else {
+            return "没有用户！";
+        }
+    }
 }

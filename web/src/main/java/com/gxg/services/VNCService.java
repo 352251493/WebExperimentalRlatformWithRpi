@@ -2,6 +2,7 @@ package com.gxg.services;
 
 import com.gxg.dao.ExperimentalNodeDao;
 import com.gxg.entities.ExperimentalNode;
+import com.gxg.entities.User;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -343,6 +344,28 @@ public class VNCService {
                     return jsonObject.toString();
                 }
             }
+        }
+    }
+
+    public String changeNodeStatus(String ip, String status, User user) {
+        if (user.getRole().equals("教师")) {
+            if (status == null || status.equals("") || status.length() == 0) {
+                return "状态不能设置为空！";
+            } else {
+                if (status.equals("正常") || status.equals("错误")) {
+                    try {
+                        experimentalNodeDao.updateStatusByIp(ip, status);
+                        return "ok";
+                    } catch (Exception e) {
+                        System.out.println(e.getMessage());
+                        return "操作数据库出错导致设置失败！";
+                    }
+                } else {
+                    return "状态设置不合法！";
+                }
+            }
+        } else {
+            return "抱歉，您的身份是" + user.getRole() + "，仅有教师可以设置节点！";
         }
     }
 }
