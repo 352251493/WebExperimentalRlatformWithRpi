@@ -29,7 +29,7 @@ def stopVNC():
 		return 'error:%s' % resultText
 s = socket.socket()
 
-host = '192.168.1.101'
+host = ''
 port = 10001
 s.bind((host, port))
 
