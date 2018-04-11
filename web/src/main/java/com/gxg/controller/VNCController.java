@@ -123,4 +123,10 @@ public class VNCController {
             return "没有用户！";
         }
     }
+
+    @RequestMapping(value = "/get_node_exist")
+    @ResponseBody
+    public String getNodeExist(HttpServletRequest request) {
+        return vncService.getNodeExist(request);
+    }
 }

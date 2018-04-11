@@ -13,6 +13,6 @@ public class ExperimentalPlatformApplication {
 
 	public static void main(String[] args) {
 		ConfigurableApplicationContext context = SpringApplication.run(ExperimentalPlatformApplication.class, args);
-		context.getBean(ExperimentalNodeDao.class).setUserIdAndTimeNull();
+		context.getBean(ExperimentalNodeDao.class).deleteAll();
 	}
 }

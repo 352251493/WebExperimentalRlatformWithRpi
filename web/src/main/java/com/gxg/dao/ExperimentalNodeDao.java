@@ -181,6 +181,12 @@ public class ExperimentalNodeDao {
     }
 
 
+    public int getNodeCountByIp(String ip) {
+        String sql = "select count(*) from ExperimentalNode where ip=?";
+        int rowCount = this.jdbcTemplate.queryForObject(sql, Integer.class, ip);
+        return rowCount;
+    }
+
     /**
      * 获得指定ip的节点
      * @param ip
@@ -263,5 +269,15 @@ public class ExperimentalNodeDao {
             }, userId);
             return experimentalNodeList;
         }
+    }
+
+    public void insertByIp(String ip) {
+        String sql = "insert into ExperimentalNode values(?, null, null, '正常')";
+        jdbcTemplate.update(sql, ip);
+    }
+
+    public void deleteAll() {
+        String sql = "delete from ExperimentalNode";
+        jdbcTemplate.update(sql);
     }
 }

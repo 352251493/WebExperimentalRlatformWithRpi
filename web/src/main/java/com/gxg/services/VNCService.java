@@ -40,7 +40,7 @@ public class VNCService {
      * @return
      */
     public String startVNC(String ip, String screenSize) {
-        try{
+        try {
             //创建一个套接字并将其连接到指定主机的指定端口
             Socket socket = new Socket(ip, port);
 
@@ -62,6 +62,7 @@ public class VNCService {
             if(info.equals("ok")) {
                 return "ok:" + ip;
             } else {
+                System.out.println(info);
                 try {
                     experimentalNodeDao.updateStatusByIp(ip, "错误");
                 } catch (Exception e) {
@@ -366,6 +367,28 @@ public class VNCService {
             }
         } else {
             return "抱歉，您的身份是" + user.getRole() + "，仅有教师可以设置节点！";
+        }
+    }
+
+    public String getNodeExist(HttpServletRequest request) {
+        String ip = ipService.getIpAddr(request);
+        if (ip == null || "".equals(ip)) {
+            System.out.println("A IP address that can not be identified");
+            return "A IP address that can not be identified";
+        } else {
+            if (experimentalNodeDao.getNodeCountByIp(ip) == 0) {
+                try {
+                    experimentalNodeDao.insertByIp(ip);
+                    System.out.println("record ok" + ip);
+                    return "record ok";
+                } catch (Exception e) {
+                    System.out.println(e.getMessage());
+                    return "Record database error";
+                }
+            } else {
+                System.out.println("ok:" + ip);
+                return "ok";
+            }
         }
     }
 }
