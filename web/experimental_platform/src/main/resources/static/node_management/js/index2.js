@@ -56,7 +56,7 @@ function getNodeInformationSuccess(data) {
             } else {
                 str += "<button type=\"button\" class=\"btn btn-success\" onclick=\"changeNodeStatus('" + experimentalNode.ip + "', '正常')\">正常</button>\n";
             }
-            str += "<button type=\"button\" class=\"btn btn-danger\">删除</button>\n";
+            // str += "<button type=\"button\" class=\"btn btn-danger\">删除</button>\n";
             str += "</td>";
             str += "</tr>";
         }
@@ -115,4 +115,5 @@ function changeNodeStatusSuccess(data) {
 
 $(document).ready(function () {
     getNodeInformation();
+    setInterval(getNodeInformation, 2000);
 });

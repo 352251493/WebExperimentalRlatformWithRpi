@@ -193,7 +193,7 @@ public class CourseController {
         } else {
             User user = (User)session.getAttribute("user");
             session.setAttribute("user", user);
-            return courseService.deleteCourse(courseId);
+            return courseService.deleteCourse(courseId, user);
         }
     }
 

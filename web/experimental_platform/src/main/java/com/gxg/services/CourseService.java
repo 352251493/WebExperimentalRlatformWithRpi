@@ -470,7 +470,7 @@ public class CourseService {
      * @param courseId 课程id
      * @return
      */
-    public String deleteCourse(String courseId) {
+    public String deleteCourse(String courseId, User user) {
         if(courseId.equals("") || courseId == null) {
             return "不能获得课程号，请确认系统生成的url是否正确！";
         } else {
@@ -481,6 +481,21 @@ public class CourseService {
                 if(course == null) {
                     return "没有该课程编号的课程，可能系统生成的url发生改动，或课程已经被删除！";
                 } else {
+                    int experimentDocumentCount = experimentalDocumentDao.getExperimentalDocumentCountByCourseId(courseId);
+                    if (experimentDocumentCount != 0) {
+                        String deleteExperimentalDocumentAllResult = "";
+                        List<ExperimentalDocument> experimentalDocumentList = experimentalDocumentDao.getExperimentalDocumentByCourseId(courseId);
+                        for (ExperimentalDocument experimentalDocument : experimentalDocumentList) {
+                            String deleteExperimentalDocumentResult = this.deleteExperimentalDocument(experimentalDocument.getId(), user);
+                            if (!("ok".equals(deleteExperimentalDocumentResult))) {
+                                deleteExperimentalDocumentAllResult += "删除实验文档" + experimentalDocument.getId() + "出错：" + deleteExperimentalDocumentResult + "\n";
+                            }
+                        }
+                        if (!("".equals(deleteExperimentalDocumentAllResult))) {
+                            deleteExperimentalDocumentAllResult += "其他实验文档已经删除成功！实验课程没有被删除！";
+                            return deleteExperimentalDocumentAllResult;
+                        }
+                    }
                     String courseImgPath = courseImgDir + course.getImg();
                     String deleteImgResult = fileService.deleteFile(courseImgPath);
                     if(deleteImgResult.equals("ok")) {
@@ -653,6 +668,21 @@ public class CourseService {
                 if(experimentalDocument == null) {
                     return "没有找到该实验信息，可能系统已经删除该实验！";
                 } else {
+                    int experimentalReportCount = experimentalReportDao.getExperimentalReportCountByExperimentalId(experimentalId);
+                    if (experimentalReportCount != 0) {
+                        List<ExperimentalReport> experimentalReportList = experimentalReportDao.getExperimentalReportByExperimentalIdAndStartLimitAndEndLimit(experimentalId, 0, experimentalReportCount);
+                        String deleteExperimentalReportAllResult = "";
+                        for (ExperimentalReport experimentalReport : experimentalReportList) {
+                            String deleteExperimentalReportResult = this.deleteExperimentalReport(experimentalReport.getId(), user);
+                            if (!("ok".equals(deleteExperimentalReportResult))) {
+                                deleteExperimentalReportAllResult += "删除" + experimentalReport.getId() + "实验报告出错：" + deleteExperimentalReportResult + "\n";
+                            }
+                        }
+                        if (!("".equals(deleteExperimentalReportAllResult))) {
+                            deleteExperimentalReportAllResult += "其他实验报告删除成功！该实验文档没有删除！";
+                            return deleteExperimentalReportAllResult;
+                        }
+                    }
                     String experimentalName = experimentalDocument.getName();
                     String courseId = experimentalDocument.getCourseId();
                     String path = userResourcesUrl + "course/experimental/" + courseId + "/" + experimentalName;
