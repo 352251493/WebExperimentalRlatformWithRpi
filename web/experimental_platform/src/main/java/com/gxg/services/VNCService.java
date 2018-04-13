@@ -33,6 +33,9 @@ public class VNCService {
     @Autowired
     private IpService ipService;
 
+    @Autowired
+    private PingService pingService;
+
     /**
      * 发送启动vnc的socket信号
      * @param ip
@@ -390,5 +393,29 @@ public class VNCService {
                 return "ok";
             }
         }
+    }
+
+    public void checkNodeExist() {
+        System.out.println("Start check node exist...");
+        if (experimentalNodeDao.getNodeCountAndStatusIsSuccess() != 0) {
+            List<ExperimentalNode> experimentalNodeList = experimentalNodeDao.getAllStatusSuccessNode();
+            for (ExperimentalNode experimentalNode : experimentalNodeList) {
+                System.out.println("Start check ip:" + experimentalNode.getIp());
+                try {
+                    if (!pingService.ping(experimentalNode.getIp())) {
+                        System.out.println("Ip:" + experimentalNode.getIp() + " is failing");
+                        experimentalNodeDao.updateStatusByIp(experimentalNode.getIp(), "错误");
+                    } else {
+                        System.out.println("ip:" + experimentalNode.getIp() + " is running");
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                System.out.println("check ip:" + experimentalNode.getIp() + " end");
+            }
+        } else {
+            System.out.println("No node can be checked");
+        }
+        System.out.println("Check node exist end");
     }
 }

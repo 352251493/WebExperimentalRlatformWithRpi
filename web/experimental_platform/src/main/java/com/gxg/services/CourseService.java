@@ -496,33 +496,57 @@ public class CourseService {
                             return deleteExperimentalDocumentAllResult;
                         }
                     }
-                    String courseImgPath = courseImgDir + course.getImg();
-                    String deleteImgResult = fileService.deleteFile(courseImgPath);
-                    if(deleteImgResult.equals("ok")) {
-                        List<ExperimentalDocument> experimentalDocumentList = experimentalDocumentDao.getExperimentalDocumentByCourseId(courseId);
-                        if(experimentalDocumentList != null) {
-                            for(ExperimentalDocument experimentalDocument : experimentalDocumentList) {
-                                String experimentalDocumentPath = userResourcesUrl + "course/experimental/" + courseId + "/" + experimentalDocument.getName();
-                                String deleteExperimentalDocumentResult = fileService.deleteFile(experimentalDocumentPath);
-                                if(deleteExperimentalDocumentResult.equals("ok")) {
-                                    experimentalDocumentDao.deleteExperimentalDocumentById(experimentalDocument.getId());
-                                } else {
-                                    if(deleteExperimentalDocumentResult.equals("删除文件失败：文件不存在！")) {
-                                        return "系统没有找到课程内的实验" + experimentalDocument.getTitle() + ",导致删除该课程失败，可能有部分实验已经删除！";
-                                    } else {
-                                        return "因为系统原因导致删除课程内实验" + experimentalDocument.getTitle() + "失败，导致删除该课程失败，可能有部分实验已经删除！";
-                                    }
-                                }
+                    int experimentalEnvironmentCount = experimentalEnvironmentDao.getExperimentalEnvironmentCountByCourse(courseId);
+                    if (experimentalEnvironmentCount != 0) {
+                        String deleteExperimentalEnvironmentAllResult = "";
+                        List<ExperimentalEnvironment> experimentalEnvironmentList = experimentalEnvironmentDao.getExperimentalEnviromentByCourse(courseId);
+                        for (ExperimentalEnvironment experimentalEnvironment : experimentalEnvironmentList) {
+                            String deleteExperimentalEnvironmentResult = this.deleteExperimentalEnvironment(experimentalEnvironment.getId(), user);
+                            if (!("ok".equals(deleteExperimentalEnvironmentResult))) {
+                                deleteExperimentalEnvironmentAllResult += "删除实验环境" + experimentalEnvironment.getId() + "出错：" + deleteExperimentalEnvironmentResult + "\n";
                             }
                         }
-                        courseDao.deleteCourseById(courseId);
-                        return "ok";
-                    } else {
-                        if(deleteImgResult.equals("删除文件失败：文件不存在！")) {
-                            return "系统没有找到课程图片，因此导致删除课程失败！";
-                        } else {
-                            return "因系统原因删除课程图片失败，导致删除课程失败！";
+                        if (!("".equals(deleteExperimentalEnvironmentAllResult))) {
+                            deleteExperimentalEnvironmentAllResult += "实验文档已经删除成功，其他实验环境已经删除成功！实验课程没有被删除！";
+                            return deleteExperimentalEnvironmentAllResult;
                         }
+                    }
+                    String courseImgPath = courseImgDir + course.getImg();
+                    String deleteImgResult = fileService.deleteFile(courseImgPath);
+                    if(deleteImgResult.equals("ok") || deleteImgResult.equals("删除文件失败：文件不存在！")) {
+                        if (deleteImgResult.equals("删除文件失败：文件不存在！")) {
+                            System.out.println(deleteImgResult);
+                        }
+//                        List<ExperimentalDocument> experimentalDocumentList = experimentalDocumentDao.getExperimentalDocumentByCourseId(courseId);
+//                        if(experimentalDocumentList != null) {
+//                            for(ExperimentalDocument experimentalDocument : experimentalDocumentList) {
+//                                String experimentalDocumentPath = userResourcesUrl + "course/experimental/" + courseId + "/" + experimentalDocument.getName();
+//                                String deleteExperimentalDocumentResult = fileService.deleteFile(experimentalDocumentPath);
+//                                if(deleteExperimentalDocumentResult.equals("ok")) {
+//                                    experimentalDocumentDao.deleteExperimentalDocumentById(experimentalDocument.getId());
+//                                } else {
+//                                    if(deleteExperimentalDocumentResult.equals("删除文件失败：文件不存在！")) {
+//                                        return "系统没有找到课程内的实验" + experimentalDocument.getTitle() + ",导致删除该课程失败，可能有部分实验已经删除！";
+//                                    } else {
+//                                        return "因为系统原因导致删除课程内实验" + experimentalDocument.getTitle() + "失败，导致删除该课程失败，可能有部分实验已经删除！";
+//                                    }
+//                                }
+//                            }
+//                        }
+                        try {
+                            courseDao.deleteCourseById(courseId);
+                            return "ok";
+                        } catch (Exception e) {
+                            System.out.println(e.getMessage());
+                            return "删除课程失败：操作数据库出错！但是课程图片和实验文档及实验报告已经删除！";
+                        }
+                    } else {
+                        return "因系统原因删除课程图片失败，导致删除课程失败！";
+//                        if(deleteImgResult.equals("删除文件失败：文件不存在！")) {
+//                            return "系统没有找到课程图片，因此导致删除课程失败！";
+//                        } else {
+//                            return "因系统原因删除课程图片失败，导致删除课程失败！";
+//                        }
                     }
                 }
             }
@@ -687,19 +711,32 @@ public class CourseService {
                     String courseId = experimentalDocument.getCourseId();
                     String path = userResourcesUrl + "course/experimental/" + courseId + "/" + experimentalName;
                     String deleteFileResult = fileService.deleteFile(path);
-                    if (deleteFileResult.equals("ok")) {
+                    if (deleteFileResult.equals("ok") || deleteFileResult.equals("删除文件失败：文件不存在！")) {
+                        if (deleteFileResult.equals("删除文件失败：文件不存在！")) {
+                            System.out.println(deleteFileResult);
+                        }
                         Timestamp time = new Timestamp(System.currentTimeMillis());
-                        experimentalDocumentDao.deleteExperimentalDocumentById(experimentalId);
-                        courseDao.updateModificationTimeById(time, courseId);
+                        try {
+                            experimentalDocumentDao.deleteExperimentalDocumentById(experimentalId);
+                        } catch (Exception e) {
+                            System.out.println(e.getMessage());
+                            return "删除实验失败：更新数据库失败，但实验文档已经被删除！";
+                        }
+                        try {
+                            courseDao.updateModificationTimeById(time, courseId);
+                        } catch (Exception e) {
+                            System.out.println(e.getMessage());
+                        }
                         return "ok";
                     } else {
-                        if (deleteFileResult.equals("删除文件失败：文件不存在！")) {
-                            return "删除实验文档失败，因为该文档不存在，可能已经被删除！";
-                        }
-                        if (deleteFileResult.equals("删除文件失败！")) {
-                            return "删除实验文档失败";
-                        }
-                        return deleteFileResult;
+                        return "删除实验文档失败";
+//                        if (deleteFileResult.equals("删除文件失败：文件不存在！")) {
+//                            return "删除实验文档失败，因为该文档不存在，可能已经被删除！";
+//                        }
+//                        if (deleteFileResult.equals("删除文件失败！")) {
+//                            return "删除实验文档失败";
+//                        }
+//                        return deleteFileResult;
                     }
                 }
             }

@@ -280,4 +280,26 @@ public class ExperimentalNodeDao {
         String sql = "delete from ExperimentalNode";
         jdbcTemplate.update(sql);
     }
+
+    public int getNodeCountAndStatusIsSuccess() {
+        String sql = "select count(*) from ExperimentalNode where status='正常'";
+        int rowCount = this.jdbcTemplate.queryForObject(sql, Integer.class);
+        return rowCount;
+    }
+
+    public List<ExperimentalNode> getAllStatusSuccessNode() {
+        String sql = "select * from ExperimentalNode where status='正常'";
+        List<ExperimentalNode> experimentalNodeList = jdbcTemplate.query(sql, new RowMapper<ExperimentalNode>() {
+            @Override
+            public ExperimentalNode mapRow(ResultSet resultSet, int i) throws SQLException {
+                ExperimentalNode experimentalNode = new ExperimentalNode();
+                experimentalNode.setIp(resultSet.getString("ip"));
+                experimentalNode.setUserId(resultSet.getString("userId"));
+                experimentalNode.setDatetime(resultSet.getTimestamp("time"));
+                experimentalNode.setStatus(resultSet.getString("status"));
+                return experimentalNode;
+            }
+        });
+        return experimentalNodeList;
+    }
 }
