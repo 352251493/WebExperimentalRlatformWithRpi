@@ -15,7 +15,7 @@ stopVNCServer()
 }
 startNoVNC()
 {
-        /home/pi/noVNC/utils/launch.sh --vnc localhost:5901 &
+        /home/pi/.experimental_platform/noVNC/utils/launch.sh --vnc localhost:5901 &
         if [ $? -eq 0 ]
         then
                 echo "Start noVNC success"
