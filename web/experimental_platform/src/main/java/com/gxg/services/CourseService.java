@@ -974,9 +974,17 @@ public class CourseService {
                 } else {
                     String path = userResourcesUrl + "course/experimental_environment/" + experimentalEnvironment.getCourse() + "/" + experimentalEnvironment.getId() + "/" + experimentalEnvironment.getName();
                     String deleteFileResult = fileService.deleteFile(path);
-                    if(deleteFileResult.equals("ok")) {
-                        experimentalEnvironmentDao.deleteExperimentalEnvironmentById(experimentalEnvironmentId);
-                        return "ok";
+                    if(deleteFileResult.equals("ok") || deleteFileResult.equals("删除文件失败：文件不存在！")) {
+                        if (deleteFileResult.equals("删除文件失败：文件不存在！")) {
+                            System.out.println(deleteFileResult);
+                        }
+                        try {
+                            experimentalEnvironmentDao.deleteExperimentalEnvironmentById(experimentalEnvironmentId);
+                            return "ok";
+                        } catch (Exception e) {
+                            System.out.println(e.getMessage());
+                            return "删除实验环境失败：操作数据库失败，但实验环境文件已经被删除！";
+                        }
                     } else {
                         return deleteFileResult;
                     }
@@ -1146,7 +1154,10 @@ public class CourseService {
                 ExperimentalReport experimentalReport = experimentalReportDao.getExperimentalReportById(experimentalReportId);
                 String experimentalReportSrc = userResourcesUrl + "/course/experimental_report/" + experimentalReport.getExperimentalId() + "/" + experimentalReport.getName();
                 String deleteFileResult = fileService.deleteFile(experimentalReportSrc);
-                if (deleteFileResult.equals("ok")) {
+                if (deleteFileResult.equals("ok") || deleteFileResult.equals("删除文件失败：文件不存在！")) {
+                    if (deleteFileResult.equals("删除文件失败：文件不存在！")) {
+                        System.out.println(deleteFileResult);
+                    }
                     try {
                         experimentalReportDao.deleteExperimentalReportById(experimentalReportId);
                         return "ok";

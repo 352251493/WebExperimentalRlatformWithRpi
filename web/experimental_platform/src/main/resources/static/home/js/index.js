@@ -42,7 +42,7 @@ function getUserSuccess(data) {
         document.getElementById("userTel").value = user['tel'];
         document.getElementById("email").innerHTML = user['email'];
         document.getElementById("userEmail").value = user['email'];
-        document.title = user['name'] + " - 个人中心 - 实验楼";
+        document.title = user['name'] + " - 个人中心 - Cloud Lab";
         // var str = "<ul class='nav navbar-nav'>" +
         //     "<li class='dropdown'>" +
         //     "<a href='javascript:void(0);' class='dropdown-toggle' data-toggle='dropdown'>" +

@@ -87,7 +87,7 @@ function showPathNameAndIntroduction() {
             }
         }
     }
-    document.title = pathName + " - 学习路径 - 实验楼";
+    document.title = pathName + " - 学习路径 - Cloud Lab";
     document.getElementById("coursePathMow").innerHTML = "<a href=\"/paths/show.html?pathName=" + courseTab + "&page=1\">" + pathName + "</a>";
     document.getElementById("coursePathName").innerHTML = pathName;
     document.getElementById("pathIntroduction").innerHTML = pathIntroduction;

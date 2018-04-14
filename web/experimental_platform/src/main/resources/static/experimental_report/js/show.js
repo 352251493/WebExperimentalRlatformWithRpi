@@ -36,7 +36,7 @@ function getCourseInformationSuccess(data) {
         window.location.href = "/experimental_report/index.html";
     } else {
         var course = JSON.parse(data);
-        document.title = course['name'] + " - 实验报告 - 实验楼";
+        document.title = course['name'] + " - 实验报告 - Cloud Lab";
         // document.getElementById("courseTab").innerHTML = "<a href=\"/courses/index.html?tag=" + course['tab'] + "&page=1\">" + course['tab'] + "</a>";
         document.getElementById("courseNameHref").innerHTML = "<a href=\"/experimental_report/show.html?courseId=" + course['id'] + "\">" + course['name'] + "</a>";
         document.getElementById("courseName").innerHTML = course['name'];

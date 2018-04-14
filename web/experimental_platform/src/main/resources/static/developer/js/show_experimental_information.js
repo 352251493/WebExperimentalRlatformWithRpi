@@ -176,7 +176,7 @@ function getExperimentalInformationSuccess(data) {
         window.location.href = "/index.html";
     } else {
         var experimentalInformation = JSON.parse(data);
-        document.title = experimentalInformation['title'] + " - 实验楼";
+        document.title = experimentalInformation['title'] + " - Cloud Lab";
         document.getElementById("experimentalDocumentTitle").innerHTML = experimentalInformation['title'];
         if(experimentalInformation['content'].indexOf("pdf") == 0) {
             var windowHeight = window.screen.availHeight;

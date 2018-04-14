@@ -41,7 +41,7 @@ function getCourseInfoSuccess(data) {
         window.location.href = "/index.html";
     } else {
         var course = JSON.parse(data);
-        document.title = course['name'] + " - 实验楼";
+        document.title = course['name'] + " - Cloud Lab";
         document.getElementById("courseName").innerHTML = course['name'];
         document.getElementById("editCourseName").value = course['name'];
         document.getElementById("courseDescription").innerHTML = course['description'];

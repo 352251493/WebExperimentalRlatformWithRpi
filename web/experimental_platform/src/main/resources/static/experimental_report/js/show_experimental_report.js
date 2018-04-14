@@ -43,7 +43,7 @@ function getCourseInformationSuccess(data) {
         window.location.href = "/experimental_report/index.html";
     } else {
         var course = JSON.parse(data);
-        // document.title = course['name'] + " - 实验报告 - 实验楼";
+        // document.title = course['name'] + " - 实验报告 - Cloud Lab";
         document.getElementById("courseNameHref").innerHTML = "<a href=\"/experimental_report/show.html?courseId=" + course['id'] + "\">" + course['name'] + "</a>";
         document.getElementById("courseName").innerHTML = course['name'];
         document.getElementById("courseDescription").innerHTML = course['description'];
@@ -194,7 +194,7 @@ function getExperimentalInformationSuccess(data) {
         window.location.href = "/experimental_report/index.html";
     } else {
         var experimentalInformation = JSON.parse(data);
-        document.title = experimentalInformation['title'] + " - 实验报告 - 实验楼";
+        document.title = experimentalInformation['title'] + " - 实验报告 - Cloud Lab";
         var courseId = window.location.href.split("?")[1].split("&")[0].split("=")[1];
         var experimentalId = window.location.href.split("?")[1].split("&")[1].split("=")[1];
         document.getElementById("experimentalNameHref").innerHTML = "<a href=\"/experimental_report/show_experimental_report.html?courseId=" + courseId + "&experimentalId=" + experimentalId+ "&page=1\">" + experimentalInformation['title'] + "</a>";

@@ -123,7 +123,7 @@ function getExperimentalInformationSuccess(data) {
         window.location.href = "/experimental_report/index.html";
     } else {
         var experimentalInformation = JSON.parse(data);
-        // document.title = experimentalInformation['title'] + " - 实验报告 - 实验楼";
+        // document.title = experimentalInformation['title'] + " - 实验报告 - Cloud Lab";
         try {
             var courseId = window.location.href.split("?")[1].split("&")[0].split("=")[1];
             var experimentalId = window.location.href.split("?")[1].split("&")[1].split("=")[1];
@@ -245,7 +245,7 @@ function getExperimentalReportInformationSuccess(data) {
                 var experimentalReportStr = obj['experimentalReport'];
                 var experimentalReport = JSON.parse(experimentalReportStr);
                 var experimentalReportSrc = obj['experimentalReportSrc'];
-                document.title = experimentalReport['title'] + " - 实验报告 - 实验楼";
+                document.title = experimentalReport['title'] + " - 实验报告 - Cloud Lab";
                 try {
                     var courseId = window.location.href.split("?")[1].split("&")[0].split("=")[1];
                     document.getElementById("experimentalReportNameHref").innerHTML = "<a href=\"/experimental_report/show_experimental_report_information.html?courseId=" + courseId + "&experimentalId=" + experimentalReport.experimentalId + "&experimentalReportId=" + experimentalReport.id + "\">" + experimentalReport.title + "</a>";

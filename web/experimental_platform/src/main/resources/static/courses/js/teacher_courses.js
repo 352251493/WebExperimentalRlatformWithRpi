@@ -130,7 +130,7 @@ function getTeacherInformation(teacherId) {
 function getTeacherInformationSuccess(data) {
     var teacher = JSON.parse(data);
     document.getElementById("teacherNameCourse").innerHTML = teacher['name'] + "老师的课程列表";
-    document.title = teacher['name'] + " - 课程 - 实验楼";
+    document.title = teacher['name'] + " - 课程 - Cloud Lab";
 }
 
 $(document).ready(function () {
