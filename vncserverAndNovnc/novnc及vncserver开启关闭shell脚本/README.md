@@ -2,7 +2,7 @@
 
 ## StartVNC.sh
 
-StartVNC.sh是为了方便启动vncserver和noVNC服务自己写的一个脚本。该脚本中含有stopVNCServer和startNoVNC两个函数，stopVNCServer用于关闭vncserver服务，StartNoVNC用于开启noVNC服务。开启vncserver的脚本分别为```vncserver :1```和```vncserver -geometry $1 :1```。后者表示传入了一个vncserver启动时屏幕的分辨率大小。该脚本没有对参数进行验证（不严谨），考虑到该脚本是由自己写在程序中调用，用户不直接调用该脚本，因此出错的概率较小，但为了保险起见，还可以对此脚本进行改进。关闭vncserver服务的脚本为stopVNCServer函数中的```vncserver -kill :1```，启动noVNC服务的脚本为startNoVNC函数的```/home/pi/noVNC/utils/launch.sh --vnc localhost:5901 &```，其中```/home/pi/noVNC```是下载noVNC后的路径，可根据自己的实际情况进行修改。
+StartVNC.sh是为了方便启动vncserver和noVNC服务自己写的一个脚本。该脚本中含有stopVNCServer和startNoVNC两个函数，stopVNCServer用于关闭vncserver服务，StartNoVNC用于开启noVNC服务。开启vncserver的脚本分别为```vncserver :1```和```vncserver -geometry $1 :1```。后者表示传入了一个vncserver启动时屏幕的分辨率大小。该脚本没有对参数进行验证（不严谨），考虑到该脚本是由自己写在程序中调用，用户不直接调用该脚本，因此出错的概率较小，但为了保险起见，还可以对此脚本进行改进。关闭vncserver服务的脚本为stopVNCServer函数中的```vncserver -kill :1```，启动noVNC服务的脚本为startNoVNC函数的```/home/pi/.experimental_platform/noVNC/utils/launch.sh --vnc localhost:5901 &```，其中```/home/pi/.experimental_platform/noVNC```是下载noVNC后的路径，可根据自己的实际情况进行修改。
 
 ## StopVNC.sh
 
