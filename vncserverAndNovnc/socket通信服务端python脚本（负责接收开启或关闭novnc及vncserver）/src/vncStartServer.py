@@ -6,8 +6,8 @@ import os
 def startVNC(screenSize):
 	print 'into startVNC...'
 	
-	resultCode = os.system('/home/pi/starVNC.sh %s' % screenSize)
-	#resultCode, resultText = commands.getstatusoutput('/home/pi/starVNC.sh %s &' % screenSize)
+	resultCode = os.system('/home/pi/.experimental_platform/starVNC.sh %s' % screenSize)
+	#resultCode, resultText = commands.getstatusoutput('/home/pi/.experimental_platform/starVNC.sh %s &' % screenSize)
 		
 	#print resultCode
 	#print resultText
@@ -19,7 +19,7 @@ def startVNC(screenSize):
 
 
 def stopVNC():
-	resultCode, resultText = commands.getstatusoutput('/home/pi/stopVNC.sh')
+	resultCode, resultText = commands.getstatusoutput('/home/pi/.experimental_platform/stopVNC.sh')
 
 	print resultCode
 	print resultText
