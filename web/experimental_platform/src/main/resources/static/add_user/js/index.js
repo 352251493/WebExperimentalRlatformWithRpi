@@ -254,8 +254,7 @@ function teacherGetCoursesTop5Success(data) {
                 "欢迎您，" + userName +
                 "</a>" +
                 "<ul class='dropdown-menu'>" +
-                "<li><a class='' href='' >我的主页</a></li>" +
-                "<li><a class='' href='' >个人设置</a></li>" +
+                "<li><a class='' href='/home/index.html' >我的主页</a></li>" +
                 "<li><a class='' href='/add_user/index.html' >添加用户</a></li>" +
                 "<li><a class='' href='' onclick='javascript:signOut(); return false;' data-toggle='modal' data-target='#signOutModel'>退出登录</a></li>" +
                 "</ul>" +
@@ -286,8 +285,7 @@ function teacherGetCoursesTop5Success(data) {
                 "欢迎您，" + userName +
                 "</a>" +
                 "<ul class='dropdown-menu'>" +
-                "<li><a class='' href='' >我的主页</a></li>" +
-                "<li><a class='' href='' >个人设置</a></li>" +
+                "<li><a class='' href='/home/index.html' >我的主页</a></li>" +
                 "<li><a class='' href='/add_user/index.html' >添加用户</a></li>" +
                 "<li><a class='' href='' onclick='javascript:signOut(); return false;' data-toggle='modal' data-target='#signOutModel'>退出登录</a></li>" +
                 "</ul>" +
