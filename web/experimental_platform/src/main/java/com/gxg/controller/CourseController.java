@@ -108,7 +108,7 @@ public class CourseController {
         if(experimentalImage.isEmpty()) {
             System.out.println("kong");
         }
-        JSONObject jsonObject = new JSONObject();
+//        JSONObject jsonObject = new JSONObject();
         String result = courseService.uploadExperimentalImg(experimentalImage);
         ExperimentalImageUploadResult uploadResult = new ExperimentalImageUploadResult();
         if(result.equals("error")) {

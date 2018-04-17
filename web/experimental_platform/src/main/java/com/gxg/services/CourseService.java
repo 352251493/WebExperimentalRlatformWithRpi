@@ -16,6 +16,7 @@ import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 /**
  * Created by 郭欣光 on 2018/1/5.
@@ -98,32 +99,50 @@ public class CourseService {
                 String id;
                 String imgName;
                 if(!courseImage.isEmpty()) {
-                    try {
-                        teacher = user.getId();
-                        String fileName = courseImage.getOriginalFilename();//获取上传文件的文件名
-                        String fileType = fileName.substring(fileName.lastIndexOf(".") + 1);//获取文件后缀名
-                        time = new Timestamp(System.currentTimeMillis());
-                        String timeString = time.toString();
-                        id = teacher + timeString.split(" ")[0].split("-")[0] + timeString.split(" ")[0].split("-")[1] + timeString.split(" ")[0].split("-")[2] + timeString.split(" ")[1].split(":")[0] + timeString.split(" ")[1].split(":")[1] + timeString.split(" ")[1].split(":")[2].split("\\.")[0];//注意，split是按照正则表达式进行分割，.在正则表达式中为特殊字符，需要转义。
-                        imgName = id + "." + fileType;
-                        File uploadDir = new File(courseImgDir);
-                        //如果上传目录不存在则创建
-                        if(!uploadDir.exists()) {
-                            uploadDir.mkdirs();
+                    synchronized (this) {
+                        try {
+                            teacher = user.getId();
+                            String fileName = courseImage.getOriginalFilename();//获取上传文件的文件名
+                            String fileType = fileName.substring(fileName.lastIndexOf(".") + 1);//获取文件后缀名
+                            time = new Timestamp(System.currentTimeMillis());
+                            String timeString = time.toString();
+                            id = teacher + timeString.split(" ")[0].split("-")[0] + timeString.split(" ")[0].split("-")[1] + timeString.split(" ")[0].split("-")[2] + timeString.split(" ")[1].split(":")[0] + timeString.split(" ")[1].split(":")[1] + timeString.split(" ")[1].split(":")[2].split("\\.")[0];//注意，split是按照正则表达式进行分割，.在正则表达式中为特殊字符，需要转义。
+                            while (courseDao.getCourseCountById(id) != 0) {
+                                Random random = new Random(100);
+                                Long idLong = Long.parseLong(id);
+                                idLong += random.nextLong();
+                                id = idLong + "";
+                                if (id.length() > 22) {
+                                    id = id.substring(0, 23);
+                                }
+                            }
+                            imgName = id + "." + fileType;
+                            File uploadDir = new File(courseImgDir);
+                            //如果上传目录不存在则创建
+                            if (!uploadDir.exists()) {
+                                uploadDir.mkdirs();
+                            }
+                            BufferedOutputStream outputStream = new BufferedOutputStream(new FileOutputStream(new File(courseImgDir, imgName)));
+                            outputStream.write(courseImage.getBytes());
+                            outputStream.flush();
+                            outputStream.close();
+                        } catch (FileNotFoundException e) {
+                            e.printStackTrace();
+                            return "上传图片失败：" + e.getMessage();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                            return "上传图片失败：" + e.getMessage();
                         }
-                        BufferedOutputStream outputStream = new BufferedOutputStream(new FileOutputStream(new File(courseImgDir, imgName)));
-                        outputStream.write(courseImage.getBytes());
-                        outputStream.flush();
-                        outputStream.close();
-                    } catch (FileNotFoundException e) {
-                        e.printStackTrace();
-                        return "上传图片失败：" + e.getMessage();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                        return "上传图片失败：" + e.getMessage();
+                        try {
+                            courseDao.createCourse(id, courseName, courseTap, courseDescribe, imgName, teacher, time, time);
+                        } catch (Exception e) {
+                            System.out.println(e.getMessage());
+                            String deleteImgResult = fileService.deleteFile(courseImgDir + imgName);
+                            System.out.println(deleteImgResult);
+                            return "操作数据库失败！";
+                        }
+                        return "ok";
                     }
-                    courseDao.createCourse(id, courseName, courseTap, courseDescribe, imgName, teacher, time, time);
-                    return "ok";
                 } else {
                     return "上传的图片为空！";
                 }
@@ -151,32 +170,54 @@ public class CourseService {
                 Timestamp time;
                 String experimentalSrc;
                 String experimentalName;
-                try{
-                    time = new Timestamp(System.currentTimeMillis());
-                    String timeString = time.toString();
-                    experimentalId = timeString.split(" ")[0].split("-")[0] + timeString.split(" ")[0].split("-")[1] + timeString.split(" ")[0].split("-")[2] + timeString.split(" ")[1].split(":")[0] + timeString.split(" ")[1].split(":")[1] + timeString.split(" ")[1].split(":")[2].split("\\.")[0];
-                    experimentalName = experimentalId + ".html";
-                    experimentalSrc = userResourcesUrl + "course/experimental/" + courseId + "/";
-                    File uploadDir = new File(experimentalSrc);
-                    //如果上传目录不存在则创建
-                    if(!uploadDir.exists()) {
-                        uploadDir.mkdirs();
+                synchronized (this) {
+                    try {
+                        time = new Timestamp(System.currentTimeMillis());
+                        String timeString = time.toString();
+                        experimentalId = timeString.split(" ")[0].split("-")[0] + timeString.split(" ")[0].split("-")[1] + timeString.split(" ")[0].split("-")[2] + timeString.split(" ")[1].split(":")[0] + timeString.split(" ")[1].split(":")[1] + timeString.split(" ")[1].split(":")[2].split("\\.")[0];
+                        while (experimentalDocumentDao.getExperimentalDocumentCountById(experimentalId) != 0) {
+                            Random random = new Random(100);
+                            Long experimentalIdLong = Long.parseLong(experimentalId);
+                            experimentalIdLong += random.nextLong();
+                            experimentalId = experimentalIdLong + "";
+                            if (experimentalId.length() > 14) {
+                                experimentalId.substring(0, 15);
+                            }
+                        }
+                        experimentalName = experimentalId + ".html";
+                        experimentalSrc = userResourcesUrl + "course/experimental/" + courseId + "/";
+                        File uploadDir = new File(experimentalSrc);
+                        //如果上传目录不存在则创建
+                        if (!uploadDir.exists()) {
+                            uploadDir.mkdirs();
+                        }
+                        File file = new File(experimentalSrc + experimentalName);
+                        FileOutputStream fileOutputStream = new FileOutputStream(file);
+                        byte by[] = experimentalContent.getBytes();
+                        fileOutputStream.write(by);
+                        fileOutputStream.close();
+                    } catch (FileNotFoundException e) {
+                        e.printStackTrace();
+                        return "往服务器中写入实验内容时失败：" + e.getMessage();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                        return "往服务器中写入实验内容时失败：" + e.getMessage();
                     }
-                    File file = new File(experimentalSrc + experimentalName);
-                    FileOutputStream fileOutputStream = new FileOutputStream(file);
-                    byte by[] = experimentalContent.getBytes();
-                    fileOutputStream.write(by);
-                    fileOutputStream.close();
-                }catch (FileNotFoundException e) {
-                    e.printStackTrace();
-                    return "往服务器中写入实验内容时失败：" + e.getMessage();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                    return "往服务器中写入实验内容时失败：" + e.getMessage();
+                    try {
+                        experimentalDocumentDao.createExperimentalDocumental(experimentalId, experimentalTitle, experimentalName, courseId, time, time);
+                    } catch (Exception e) {
+                        System.out.println(e.getMessage());
+                        System.out.println(fileService.deleteFile(experimentalSrc + experimentalName));
+                        return "操作数据库失败！";
+                    }
+                    try {
+                        courseDao.updateModificationTimeById(time, courseId);
+                    } catch (Exception e) {
+                        System.out.println(e.getMessage());
+                    } finally {
+                        return "ok";
+                    }
                 }
-                experimentalDocumentDao.createExperimentalDocumental(experimentalId, experimentalTitle, experimentalName, courseId, time, time);
-                courseDao.updateModificationTimeById(time, courseId);
-                return "ok";
             } else {
                 return "您的身份是学生，仅有教师可以编写实验！";
             }
@@ -262,28 +303,38 @@ public class CourseService {
      */
     public String uploadExperimentalImg(MultipartFile ExperimentalImage) {
         String imgName;
-        try {
-            String fileName = ExperimentalImage.getOriginalFilename();//获取上传文件的文件名
-            String fileType = fileName.substring(fileName.lastIndexOf(".") + 1);//获取文件后缀名
-            Timestamp time = new Timestamp(System.currentTimeMillis());
-            String timeString = time.toString();
-            imgName = timeString.split(" ")[0].split("-")[0] + timeString.split(" ")[0].split("-")[1] + timeString.split(" ")[0].split("-")[2] + timeString.split(" ")[1].split(":")[0] + timeString.split(" ")[1].split(":")[1] + timeString.split(" ")[1].split(":")[2].split("\\.")[0] + "." + fileType;//注意，split是按照正则表达式进行分割，.在正则表达式中为特殊字符，需要转义。
-            String experimentalImgUrl = userResourcesUrl + "course/experimental/img/";
-            File uploadDir = new File(experimentalImgUrl);
-            //如果上传目录不存在则创建
-            if(!uploadDir.exists()) {
-                uploadDir.mkdirs();
+        synchronized (this) {
+            try {
+                String fileName = ExperimentalImage.getOriginalFilename();//获取上传文件的文件名
+                String fileType = fileName.substring(fileName.lastIndexOf(".") + 1);//获取文件后缀名
+                Timestamp time = new Timestamp(System.currentTimeMillis());
+                String timeString = time.toString();
+                String imgId = timeString.split(" ")[0].split("-")[0] + timeString.split(" ")[0].split("-")[1] + timeString.split(" ")[0].split("-")[2] + timeString.split(" ")[1].split(":")[0] + timeString.split(" ")[1].split(":")[1] + timeString.split(" ")[1].split(":")[2].split("\\.")[0];//注意，split是按照正则表达式进行分割，.在正则表达式中为特殊字符，需要转义。
+                imgName = imgId + "." + fileType;
+                String experimentalImgUrl = userResourcesUrl + "course/experimental/img/";
+                File uploadDir = new File(experimentalImgUrl);
+                //如果上传目录不存在则创建
+                if (!uploadDir.exists()) {
+                    uploadDir.mkdirs();
+                }
+                while ((new File(experimentalImgUrl, imgName)).exists()) {
+                    Long imgIdLong = Long.parseLong(imgId);
+                    Random random = new Random(100);
+                    imgIdLong += random.nextLong();
+                    imgId = imgIdLong + "";
+                    imgName = imgId + "." + fileType;
+                }
+                BufferedOutputStream outputStream = new BufferedOutputStream(new FileOutputStream(new File(experimentalImgUrl, imgName)));
+                outputStream.write(ExperimentalImage.getBytes());
+                outputStream.flush();
+                outputStream.close();
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+                return "error";
+            } catch (IOException e) {
+                e.printStackTrace();
+                return "error";
             }
-            BufferedOutputStream outputStream = new BufferedOutputStream(new FileOutputStream(new File(experimentalImgUrl, imgName)));
-            outputStream.write(ExperimentalImage.getBytes());
-            outputStream.flush();
-            outputStream.close();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-            return "error";
-        } catch (IOException e) {
-            e.printStackTrace();
-            return "error";
         }
         return "/user/course/experimental/img/" + imgName;
     }

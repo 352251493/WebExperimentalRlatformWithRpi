@@ -55,21 +55,22 @@ function getMyCoursesSuccess(data) {
                         for (var i = 0; i < coursesArray.length; i++) {
                             var course = coursesArray[i];
                             var description = course['description'];
-                            if (description.length > 25) {
-                                description = description.substring(0, 25);
+                            if (description.length > 10) {
+                                description = description.substring(0, 10);
                                 description = description + "...";
                             }
-                            str += "<div class=\"col-md-4\">";
-                            str += " <a class=\"media\" href=\"/developer/course_information.html?courseID=" + course['id'] + "\" target=\"_blank\">";
-                            str += "<div class=\"media-left\">";
-                            str += "<img class=\"media-object\" src=\"../user/course/img/" + course['img'] + "\">";
+                            str += "<div class=\"col-md-4\">\n";
+                            str += " <a class=\"media\" href=\"/developer/course_information.html?courseID=" + course['id'] + "\" target=\"_blank\">\n";
+                            str += "<div class=\"media-left\">\n";
+                            str += "<img class=\"media-object\" src=\"/user/course/img/" + course['img'] + "\">\n";
                             str += "</div>";
-                            str += "<div class=\"media-body\">";
-                            str += "<p>" + course['name'] + "</p>";
-                            str += "<h4>" + description + "</h4>";
-                            str += "</div>";
-                            str += "</a>";
-                            str += "</div>";
+                            str += "<div class=\"media-body\">\n";
+                            str += "<p>" + course['name'] + "</p>\n";
+                            str += "<h4>" + description + "</h4>\n";
+                            str += "</div>\n";
+                            str += "</a>\n";
+                            str += "</div>\n";
+                            str += "\n";
                         }
                         document.getElementById("myCourses").innerHTML = str;
                         document.getElementById("pageNow").innerHTML = "&nbsp;&nbsp;" + page + "/" + pageCount + "&nbsp;&nbsp;";
