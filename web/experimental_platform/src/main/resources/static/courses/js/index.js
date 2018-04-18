@@ -17,9 +17,22 @@ function getUserInfo() {
         cache: false,//设置不缓存
         success: getUserSuccess,
         error: function (XMLHttpRequest, textStatus, errorThrown) {
-            alert(XMLHttpRequest.status);
-            alert(XMLHttpRequest.readyState);
-            alert(textStatus);
+            if (XMLHttpRequest.status >= 400 && XMLHttpRequest.status < 500) {
+                alert("客户端请求出错！错误代码（" + XMLHttpRequest.status + "," + XMLHttpRequest.readyState + "," + textStatus + "）");
+            } else {
+                if (XMLHttpRequest.status >= 500 || XMLHttpRequest.status <= 600) {
+                    alert("服务器出错！错误代码（" + XMLHttpRequest.status + "," + XMLHttpRequest.readyState + "," + textStatus + "）");
+                } else {
+                    if (XMLHttpRequest.status >= 300 || XMLHttpRequest.status < 400) {
+                        alert("重定向问题！错误代码（" + XMLHttpRequest.status + "," + XMLHttpRequest.readyState + "," + textStatus + "）");
+                    } else {
+                        alert("抱歉，系统好像出现一些异常！错误代码（" + XMLHttpRequest.status + "," + XMLHttpRequest.readyState + "," + textStatus + "）");
+                    }
+                }
+            }
+            // alert(XMLHttpRequest.status);
+            // alert(XMLHttpRequest.readyState);
+            // alert(textStatus);
         }
     });
     return false;
@@ -153,9 +166,22 @@ function login() {
         data: obj,
         success: loginSuccess,
         error: function (XMLHttpRequest, textStatus, errorThrown) {
-            alert(XMLHttpRequest.status);
-            alert(XMLHttpRequest.readyState);
-            alert(textStatus);
+            if (XMLHttpRequest.status >= 400 && XMLHttpRequest.status < 500) {
+                alert("客户端请求出错！错误代码（" + XMLHttpRequest.status + "," + XMLHttpRequest.readyState + "," + textStatus + "）");
+            } else {
+                if (XMLHttpRequest.status >= 500 || XMLHttpRequest.status <= 600) {
+                    alert("服务器出错！错误代码（" + XMLHttpRequest.status + "," + XMLHttpRequest.readyState + "," + textStatus + "）");
+                } else {
+                    if (XMLHttpRequest.status >= 300 || XMLHttpRequest.status < 400) {
+                        alert("重定向问题！错误代码（" + XMLHttpRequest.status + "," + XMLHttpRequest.readyState + "," + textStatus + "）");
+                    } else {
+                        alert("抱歉，系统好像出现一些异常！错误代码（" + XMLHttpRequest.status + "," + XMLHttpRequest.readyState + "," + textStatus + "）");
+                    }
+                }
+            }
+            // alert(XMLHttpRequest.status);
+            // alert(XMLHttpRequest.readyState);
+            // alert(textStatus);
         }
     });
     return false;
@@ -189,9 +215,22 @@ function signOut() {
         cache: false,//设置不缓存
         success: signOutSuccess,
         error: function (XMLHttpRequest, textStatus, errorThrown) {
-            alert(XMLHttpRequest.status);
-            alert(XMLHttpRequest.readyState);
-            alert(textStatus);
+            if (XMLHttpRequest.status >= 400 && XMLHttpRequest.status < 500) {
+                alert("客户端请求出错！错误代码（" + XMLHttpRequest.status + "," + XMLHttpRequest.readyState + "," + textStatus + "）");
+            } else {
+                if (XMLHttpRequest.status >= 500 || XMLHttpRequest.status <= 600) {
+                    alert("服务器出错！错误代码（" + XMLHttpRequest.status + "," + XMLHttpRequest.readyState + "," + textStatus + "）");
+                } else {
+                    if (XMLHttpRequest.status >= 300 || XMLHttpRequest.status < 400) {
+                        alert("重定向问题！错误代码（" + XMLHttpRequest.status + "," + XMLHttpRequest.readyState + "," + textStatus + "）");
+                    } else {
+                        alert("抱歉，系统好像出现一些异常！错误代码（" + XMLHttpRequest.status + "," + XMLHttpRequest.readyState + "," + textStatus + "）");
+                    }
+                }
+            }
+            // alert(XMLHttpRequest.status);
+            // alert(XMLHttpRequest.readyState);
+            // alert(textStatus);
         }
     });
 }
@@ -212,9 +251,22 @@ function keepUserConnection() {
         cache: false,//设置不缓存
         success: keepUserConnectionSuccess,
         error: function (XMLHttpRequest, textStatus, errorThrown) {
-            alert(XMLHttpRequest.status);
-            alert(XMLHttpRequest.readyState);
-            alert(textStatus);
+            if (XMLHttpRequest.status >= 400 && XMLHttpRequest.status < 500) {
+                alert("客户端请求出错！错误代码（" + XMLHttpRequest.status + "," + XMLHttpRequest.readyState + "," + textStatus + "）");
+            } else {
+                if (XMLHttpRequest.status >= 500 || XMLHttpRequest.status <= 600) {
+                    alert("服务器出错！错误代码（" + XMLHttpRequest.status + "," + XMLHttpRequest.readyState + "," + textStatus + "）");
+                } else {
+                    if (XMLHttpRequest.status >= 300 || XMLHttpRequest.status < 400) {
+                        alert("重定向问题！错误代码（" + XMLHttpRequest.status + "," + XMLHttpRequest.readyState + "," + textStatus + "）");
+                    } else {
+                        alert("抱歉，系统好像出现一些异常！错误代码（" + XMLHttpRequest.status + "," + XMLHttpRequest.readyState + "," + textStatus + "）");
+                    }
+                }
+            }
+            // alert(XMLHttpRequest.status);
+            // alert(XMLHttpRequest.readyState);
+            // alert(textStatus);
         }
     });
 }
@@ -307,9 +359,22 @@ function teacherGetCoursesTop5() {
         cache: false,//设置不缓存
         success: teacherGetCoursesTop5Success,
         error: function (XMLHttpRequest, textStatus, errorThrown) {
-            alert(XMLHttpRequest.status);
-            alert(XMLHttpRequest.readyState);
-            alert(textStatus);
+            if (XMLHttpRequest.status >= 400 && XMLHttpRequest.status < 500) {
+                alert("客户端请求出错！错误代码（" + XMLHttpRequest.status + "," + XMLHttpRequest.readyState + "," + textStatus + "）");
+            } else {
+                if (XMLHttpRequest.status >= 500 || XMLHttpRequest.status <= 600) {
+                    alert("服务器出错！错误代码（" + XMLHttpRequest.status + "," + XMLHttpRequest.readyState + "," + textStatus + "）");
+                } else {
+                    if (XMLHttpRequest.status >= 300 || XMLHttpRequest.status < 400) {
+                        alert("重定向问题！错误代码（" + XMLHttpRequest.status + "," + XMLHttpRequest.readyState + "," + textStatus + "）");
+                    } else {
+                        alert("抱歉，系统好像出现一些异常！错误代码（" + XMLHttpRequest.status + "," + XMLHttpRequest.readyState + "," + textStatus + "）");
+                    }
+                }
+            }
+            // alert(XMLHttpRequest.status);
+            // alert(XMLHttpRequest.readyState);
+            // alert(textStatus);
         }
     });
 }
@@ -402,9 +467,22 @@ $(document).ready(function () {
         cache: false,//设置不缓存
         success: getInitUserSuccess,
         error: function (XMLHttpRequest, textStatus, errorThrown) {
-            alert(XMLHttpRequest.status);
-            alert(XMLHttpRequest.readyState);
-            alert(textStatus);
+            if (XMLHttpRequest.status >= 400 && XMLHttpRequest.status < 500) {
+                alert("客户端请求出错！错误代码（" + XMLHttpRequest.status + "," + XMLHttpRequest.readyState + "," + textStatus + "）");
+            } else {
+                if (XMLHttpRequest.status >= 500 || XMLHttpRequest.status <= 600) {
+                    alert("服务器出错！错误代码（" + XMLHttpRequest.status + "," + XMLHttpRequest.readyState + "," + textStatus + "）");
+                } else {
+                    if (XMLHttpRequest.status >= 300 || XMLHttpRequest.status < 400) {
+                        alert("重定向问题！错误代码（" + XMLHttpRequest.status + "," + XMLHttpRequest.readyState + "," + textStatus + "）");
+                    } else {
+                        alert("抱歉，系统好像出现一些异常！错误代码（" + XMLHttpRequest.status + "," + XMLHttpRequest.readyState + "," + textStatus + "）");
+                    }
+                }
+            }
+            // alert(XMLHttpRequest.status);
+            // alert(XMLHttpRequest.readyState);
+            // alert(textStatus);
         }
     });
 });

@@ -24,9 +24,22 @@ function selectIP(ip) {
 		data: obj,
 		success: selectIPSuccess,
 		error: function (XMLHttpRequest, textStatus, errorThrown) {
-			alert(XMLHttpRequest.status);
-			alert(XMLHttpRequest.readyState);
-			alert(textStatus);
+			if (XMLHttpRequest.status >= 400 && XMLHttpRequest.status < 500) {
+				alert("客户端请求出错！错误代码（" + XMLHttpRequest.status + "," + XMLHttpRequest.readyState + "," + textStatus + "）");
+			} else {
+				if (XMLHttpRequest.status >= 500 || XMLHttpRequest.status <= 600) {
+					alert("服务器出错！错误代码（" + XMLHttpRequest.status + "," + XMLHttpRequest.readyState + "," + textStatus + "）");
+				} else {
+					if (XMLHttpRequest.status >= 300 || XMLHttpRequest.status < 400) {
+						alert("重定向问题！错误代码（" + XMLHttpRequest.status + "," + XMLHttpRequest.readyState + "," + textStatus + "）");
+					} else {
+						alert("抱歉，系统好像出现一些异常！错误代码（" + XMLHttpRequest.status + "," + XMLHttpRequest.readyState + "," + textStatus + "）");
+					}
+				}
+			}
+			// alert(XMLHttpRequest.status);
+			// alert(XMLHttpRequest.readyState);
+			// alert(textStatus);
 		}
 	});
 	// document.getElementById("terminal").contentWindow.location.href = "http://" + selectIP + ":6080/vnc.html";//跳转到相应终端

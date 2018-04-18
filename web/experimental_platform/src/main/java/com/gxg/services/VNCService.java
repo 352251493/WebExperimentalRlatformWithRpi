@@ -153,7 +153,8 @@ public class VNCService {
                             try {
                                 experimentalNodeDao.increaseNodeUser(ip, userId);
                             } catch (Exception e) {
-                                this.stopVNC(ip);
+                                String stopVNCResult = this.stopVNC(ip);
+                                System.out.println(stopVNCResult);
                                 return "操作打开vnc服务时数据库出错！";
                             }
                             return result;
@@ -169,7 +170,8 @@ public class VNCService {
                 try {
                     experimentalNodeDao.updateNodeTime(ip);
                 } catch (Exception e) {
-                    e.printStackTrace();
+//                    e.printStackTrace();
+                    System.out.println(e.getMessage());
                 } finally {
                     return "ok:" + ip;
                 }
@@ -195,7 +197,8 @@ public class VNCService {
             try {
                 experimentalNodeDao.updateNodeTimeByUserId(id);
             } catch (Exception e) {
-                e.printStackTrace();
+//                e.printStackTrace();
+                System.out.println(e.getMessage());
             }
         }
     }
@@ -220,7 +223,8 @@ public class VNCService {
                         try {
                             experimentalNodeDao.updateStatusByIp(experimentalNode.getIp(), "错误");
                         } catch (Exception e2) {
-                            e2.printStackTrace();
+//                            e2.printStackTrace();
+                            System.out.println(e2.getMessage());
                         } finally {
                             return "操作数据库出错：" + e.getMessage();
                         }

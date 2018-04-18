@@ -445,33 +445,59 @@ public class CourseService {
                 String id;
                 Timestamp time;
                 String name;
+                String uploadDir;
                 if(!experimentalDocument.isEmpty()) {
-                    try{
-                        String fileName = experimentalDocument.getOriginalFilename();//获取上传文件的文件名
-                        String fileType = fileName.substring(fileName.lastIndexOf(".") + 1);//获取文件后缀名
-                        time = new Timestamp(System.currentTimeMillis());
-                        String timeString = time.toString();
-                        id = timeString.split(" ")[0].split("-")[0] + timeString.split(" ")[0].split("-")[1] + timeString.split(" ")[0].split("-")[2] + timeString.split(" ")[1].split(":")[0] + timeString.split(" ")[1].split(":")[1] + timeString.split(" ")[1].split(":")[2].split("\\.")[0];//注意，split是按照正则表达式进行分割，.在正则表达式中为特殊字符，需要转义。
-                        name = id + "." + fileType;
-                        String uploadDir = userResourcesUrl + "/course/experimental/" + courseId + "/";
-                        File uploadFileDir = new File(uploadDir);
-                        if(!uploadFileDir.exists()) {
-                            uploadFileDir.mkdirs();
+                    synchronized (this) {
+                        try {
+                            String fileName = experimentalDocument.getOriginalFilename();//获取上传文件的文件名
+                            String fileType = fileName.substring(fileName.lastIndexOf(".") + 1);//获取文件后缀名
+                            time = new Timestamp(System.currentTimeMillis());
+                            String timeString = time.toString();
+                            id = timeString.split(" ")[0].split("-")[0] + timeString.split(" ")[0].split("-")[1] + timeString.split(" ")[0].split("-")[2] + timeString.split(" ")[1].split(":")[0] + timeString.split(" ")[1].split(":")[1] + timeString.split(" ")[1].split(":")[2].split("\\.")[0];//注意，split是按照正则表达式进行分割，.在正则表达式中为特殊字符，需要转义。
+                            while (experimentalDocumentDao.getExperimentalDocumentCountById(id) != 0) {
+                                Random random = new Random(100);
+                                Long idLong = Long.parseLong(id);
+                                idLong += random.nextLong();
+                                id = idLong + "";
+                                if (id.length() > 14) {
+                                    id = id.substring(0, 15);
+                                }
+                            }
+                            name = id + "." + fileType;
+                            uploadDir = userResourcesUrl + "/course/experimental/" + courseId + "/";
+                            File uploadFileDir = new File(uploadDir);
+                            if (!uploadFileDir.exists()) {
+                                uploadFileDir.mkdirs();
+                            }
+                            BufferedOutputStream outputStream = new BufferedOutputStream(new FileOutputStream(new File(uploadDir, name)));
+                            outputStream.write(experimentalDocument.getBytes());
+                            outputStream.flush();
+                            outputStream.close();
+                        } catch (FileNotFoundException e) {
+                            e.printStackTrace();
+                            return "上传文档失败：" + e.getMessage();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                            return "上传文档失败：" + e.getMessage();
                         }
-                        BufferedOutputStream outputStream = new BufferedOutputStream(new FileOutputStream(new File(uploadDir, name)));
-                        outputStream.write(experimentalDocument.getBytes());
-                        outputStream.flush();
-                        outputStream.close();
-                    } catch (FileNotFoundException e) {
-                        e.printStackTrace();
-                        return "上传文档失败：" + e.getMessage();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                        return "上传文档失败：" + e.getMessage();
+                        try {
+                            experimentalDocumentDao.createExperimentalDocumental(id, experimentalDocumentTitle, name, courseId, time, time);
+                        } catch (Exception e) {
+                            System.out.println(e.getMessage());
+                            String deleteFileResult = fileService.deleteFile(uploadDir + name);
+                            if (!deleteFileResult.equals("ok")) {
+                                System.out.println(deleteFileResult);
+                            }
+                            return "操作数据库失败！";
+                        }
+                        try {
+                            courseDao.updateModificationTimeById(time, courseId);
+                        } catch (Exception e) {
+                            System.out.println(e.getMessage());
+                        } finally {
+                            return "上传成功！";
+                        }
                     }
-                    experimentalDocumentDao.createExperimentalDocumental(id, experimentalDocumentTitle, name, courseId, time, time);
-                    courseDao.updateModificationTimeById(time, courseId);
-                    return "上传成功！";
                 } else {
                     return "文件为空！";
                 }
@@ -506,8 +532,13 @@ public class CourseService {
                                 return "没有该课程编号的课程，可能系统生成的url发生改动，或课程已经被删除！";
                             } else {
                                 Timestamp time = new Timestamp(System.currentTimeMillis());
-                                courseDao.updateNameAndDescriptionAndModificationTimeById(courseId, courseName, courseDescription, time);
-                                return "ok";
+                                try {
+                                    courseDao.updateNameAndDescriptionAndModificationTimeById(courseId, courseName, courseDescription, time);
+                                    return "ok";
+                                } catch (Exception e) {
+                                    System.out.println(e.getMessage());
+                                    return "操作数据库失败！";
+                                }
                             }
                         }
                     }
@@ -636,9 +667,19 @@ public class CourseService {
                                 String writeFileResult = fileService.writeFile(experimentalSrc, experimentalName, experimentalContent);
                                 if(writeFileResult.equals("ok")) {
                                     Timestamp time = new Timestamp(System.currentTimeMillis());
-                                    experimentalDocumentDao.updateTitleAndModificationTimeById(experimentalId, experimentalTitle, time);
-                                    courseDao.updateModificationTimeById(time, courseId);
-                                    return "ok";
+                                    try {
+                                        experimentalDocumentDao.updateTitleAndModificationTimeById(experimentalId, experimentalTitle, time);
+                                    } catch (Exception e) {
+                                        System.out.println(e.getMessage());
+                                        return "操作数据库失败！";
+                                    }
+                                    try {
+                                        courseDao.updateModificationTimeById(time, courseId);
+                                    } catch (Exception e) {
+                                        System.out.println(e.getMessage());
+                                    } finally {
+                                        return "ok";
+                                    }
                                 } else {
                                     return writeFileResult;
                                 }
@@ -675,9 +716,19 @@ public class CourseService {
                             return "没有找到该实验相关信息，可能服务器已经删除该实验！";
                         } else {
                             Timestamp time = new Timestamp(System.currentTimeMillis());
-                            experimentalDocumentDao.updateTitleAndModificationTimeById(experimentalId, experimentalTitle, time);
-                            courseDao.updateModificationTimeById(time, experimentalDocument.getCourseId());
-                            return "ok";
+                            try {
+                                experimentalDocumentDao.updateTitleAndModificationTimeById(experimentalId, experimentalTitle, time);
+                            } catch (Exception e) {
+                                System.out.println(e.getMessage());
+                                return "操作数据库失败！";
+                            }
+                            try {
+                                courseDao.updateModificationTimeById(time, experimentalDocument.getCourseId());
+                            } catch (Exception e) {
+                                System.out.println(e.getMessage());
+                            } finally {
+                                return "ok";
+                            }
                         }
                     }
                 } else {
@@ -712,9 +763,14 @@ public class CourseService {
                         String uploadFileResult = fileService.uploadFile(editExperimentalDocumentInput, name, path);
                         if(uploadFileResult.equals("ok")) {
                             Timestamp time = new Timestamp(System.currentTimeMillis());
-                            experimentalDocumentDao.updateModificationTimeById(editExperimentalDocumentContentPdfExperimentalId, time);
-                            courseDao.updateModificationTimeById(time, courseId);
-                            return "ok";
+                            try {
+                                experimentalDocumentDao.updateModificationTimeById(editExperimentalDocumentContentPdfExperimentalId, time);
+                                courseDao.updateModificationTimeById(time, courseId);
+                            } catch (Exception e) {
+                                System.out.println(e.getMessage());
+                            } finally {
+                                return "ok";
+                            }
                         } else {
                             return uploadFileResult;
                         }
@@ -912,24 +968,48 @@ public class CourseService {
                 if(sizeDouble > 5 * 1024 * 1024) {
                     return "上传文件超过指定大小！";
                 } else {
-                    String name = experimentalEnvironment.getOriginalFilename();
-                    Timestamp time = new Timestamp(System.currentTimeMillis());
-                    String timeString = time.toString();
-                    String id = timeString.split(" ")[0].split("-")[0] + timeString.split(" ")[0].split("-")[1] + timeString.split(" ")[0].split("-")[2] + timeString.split(" ")[1].split(":")[0] + timeString.split(" ")[1].split(":")[1] + timeString.split(" ")[1].split(":")[2].split("\\.")[0];//注意，split是按照正则表达式进行分割，.在正则表达式中为特殊字符，需要转义。
-                    String path = userResourcesUrl + "course/experimental_environment/" + courseId + "/" + id + "/";
-                    String uploadResult = fileService.uploadFile(experimentalEnvironment, name, path);
-                    if(uploadResult.equals("ok")) {
-                        ExperimentalEnvironment experimentalEnvironment1 = new ExperimentalEnvironment();
-                        experimentalEnvironment1.setId(id);
-                        experimentalEnvironment1.setName(name);
-                        experimentalEnvironment1.setStatus("已上传");
-                        experimentalEnvironment1.setCourse(courseId);
-                        experimentalEnvironment1.setSize(sizeDouble);
-                        experimentalEnvironment1.setCreateTime(time);
-                        experimentalEnvironmentDao.createExperimetalEnvironment(experimentalEnvironment1);
-                        return "上传成功！";
-                    } else {
-                        return uploadResult;
+                    synchronized (this) {
+                        String name = experimentalEnvironment.getOriginalFilename();
+                        Timestamp time = new Timestamp(System.currentTimeMillis());
+                        String timeString = time.toString();
+                        String id = timeString.split(" ")[0].split("-")[0] + timeString.split(" ")[0].split("-")[1] + timeString.split(" ")[0].split("-")[2] + timeString.split(" ")[1].split(":")[0] + timeString.split(" ")[1].split(":")[1] + timeString.split(" ")[1].split(":")[2].split("\\.")[0];//注意，split是按照正则表达式进行分割，.在正则表达式中为特殊字符，需要转义。
+                        while (experimentalEnvironmentDao.getExperimentalEnvironmentCountById(id) != 0) {
+                            Random random = new Random(100);
+                            Long idLong = Long.parseLong(id);
+                            idLong += random.nextLong();
+                            id = idLong + "";
+                            if (id.length() > 14) {
+                                id = id.substring(0, 15);
+                            }
+                        }
+                        String path = userResourcesUrl + "course/experimental_environment/" + courseId + "/" + id + "/";
+                        String uploadResult = fileService.uploadFile(experimentalEnvironment, name, path);
+                        if (uploadResult.equals("ok")) {
+                            ExperimentalEnvironment experimentalEnvironment1 = new ExperimentalEnvironment();
+                            experimentalEnvironment1.setId(id);
+                            experimentalEnvironment1.setName(name);
+                            experimentalEnvironment1.setStatus("已上传");
+                            experimentalEnvironment1.setCourse(courseId);
+                            experimentalEnvironment1.setSize(sizeDouble);
+                            experimentalEnvironment1.setCreateTime(time);
+                            try {
+                                experimentalEnvironmentDao.createExperimetalEnvironment(experimentalEnvironment1);
+                            } catch (Exception e) {
+                                System.out.println(e.getMessage());
+                                String deleteFile = fileService.deleteFile(path + name);
+                                System.out.println(deleteFile);
+                                return "操作数据库失败！";
+                            }
+                            try {
+                                courseDao.updateModificationTimeById(time, courseId);
+                            } catch (Exception e) {
+                                System.out.println(e.getMessage());
+                            } finally {
+                                return "上传成功！";
+                            }
+                        } else {
+                            return uploadResult;
+                        }
                     }
                 }
             }
@@ -995,8 +1075,13 @@ public class CourseService {
                             }
                         }
                         if(ftpSuccess) {
-                            experimentalEnvironmentDao.updateStatusById("已发送", experimentalEnvironmentId);
-                            return "ok";
+                            try {
+                                experimentalEnvironmentDao.updateStatusById("已发送", experimentalEnvironmentId);
+                                return "ok";
+                            } catch (Exception e) {
+                                System.out.println(e.getMessage());
+                                return "已发送成功，但操作数据库失败，导致状态为改变！";
+                            }
                         } else {
                             return errorReqult;
                         }
@@ -1104,28 +1189,41 @@ public class CourseService {
             String fileName = experimentalReportFile.getOriginalFilename();//获取上传文件的文件名
             String fileType = fileName.substring(fileName.lastIndexOf(".") + 1);//获取文件后缀名
             if (fileType.equals("pdf")) {
-                timestamp = new Timestamp(System.currentTimeMillis());
-                String timeString = timestamp.toString();
-                id = timeString.split(" ")[0].split("-")[0] + timeString.split(" ")[0].split("-")[1] + timeString.split(" ")[0].split("-")[2] + timeString.split(" ")[1].split(":")[0] + timeString.split(" ")[1].split(":")[1] + timeString.split(" ")[1].split(":")[2].split("\\.")[0];//注意，split是按照正则表达式进行分割，.在正则表达式中为特殊字符，需要转义。
-                name = id + "." + fileType;
-                String uploadDir = userResourcesUrl + "/course/experimental_report/" + experimentalId + "/";
-                String uploadResult = fileService.uploadFile(experimentalReportFile, name, uploadDir);
-                if (uploadResult.equals("ok")) {
-                    ExperimentalReport experimentalReport = new ExperimentalReport();
-                    experimentalReport.setId(id);
-                    experimentalReport.setTitle(experimentalRepoetTitle);
-                    experimentalReport.setName(name);
-                    experimentalReport.setCreateTime(timestamp);
-                    experimentalReport.setExperimentalId(experimentalId);
-                    try {
-                        experimentalReportDao.insertExperimentalReport(experimentalReport);
-                        return "ok";
-                    } catch (Exception e) {
-                        System.out.println(e.getMessage());
-                        return "写入数据库时出错！";
+                synchronized (this) {
+                    timestamp = new Timestamp(System.currentTimeMillis());
+                    String timeString = timestamp.toString();
+                    id = timeString.split(" ")[0].split("-")[0] + timeString.split(" ")[0].split("-")[1] + timeString.split(" ")[0].split("-")[2] + timeString.split(" ")[1].split(":")[0] + timeString.split(" ")[1].split(":")[1] + timeString.split(" ")[1].split(":")[2].split("\\.")[0];//注意，split是按照正则表达式进行分割，.在正则表达式中为特殊字符，需要转义。
+                    while (experimentalReportDao.getExperimentalReportCountById(id) != 0) {
+                        Random random = new Random(100);
+                        Long idLong = Long.parseLong(id);
+                        idLong += random.nextLong();
+                        id = idLong + "";
+                        if (id.length() > 14) {
+                            id = id.substring(0, 15);
+                        }
                     }
-                } else {
-                    return uploadResult;
+                    name = id + "." + fileType;
+                    String uploadDir = userResourcesUrl + "/course/experimental_report/" + experimentalId + "/";
+                    String uploadResult = fileService.uploadFile(experimentalReportFile, name, uploadDir);
+                    if (uploadResult.equals("ok")) {
+                        ExperimentalReport experimentalReport = new ExperimentalReport();
+                        experimentalReport.setId(id);
+                        experimentalReport.setTitle(experimentalRepoetTitle);
+                        experimentalReport.setName(name);
+                        experimentalReport.setCreateTime(timestamp);
+                        experimentalReport.setExperimentalId(experimentalId);
+                        try {
+                            experimentalReportDao.insertExperimentalReport(experimentalReport);
+                            return "ok";
+                        } catch (Exception e) {
+                            System.out.println(e.getMessage());
+                            String deleteFileResult = fileService.deleteFile(uploadDir + name);
+                            System.out.println(deleteFileResult);
+                            return "写入数据库时出错！";
+                        }
+                    } else {
+                        return uploadResult;
+                    }
                 }
             } else {
                 return "上传的文档必须为pdf格式！";
@@ -1214,7 +1312,7 @@ public class CourseService {
                         return "ok";
                     } catch (Exception e) {
                         System.out.println(e.getMessage());
-                        return "操作数据库失败！";
+                        return "操作数据库失败！但是实验报告已经删除！";
                     }
                 } else {
                     return deleteFileResult;
