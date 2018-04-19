@@ -55,6 +55,7 @@ function getCourseInfoSuccess(data) {
     } else {
         var course = JSON.parse(data);
         document.title = course['name'] + " - Cloud Lab";
+        document.getElementById("courseNameHref").innerHTML = "<a href=\"/developer/course_information.html?courseID=" + course['id'] + "\">" + course['name'] + "</a>";
         document.getElementById("courseName").innerHTML = course['name'];
         document.getElementById("editCourseName").value = course['name'];
         document.getElementById("courseDescription").innerHTML = course['description'];
