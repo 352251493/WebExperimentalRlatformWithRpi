@@ -13,6 +13,14 @@ public class ExperimentalPlatformApplication {
 
 	public static void main(String[] args) {
 		ConfigurableApplicationContext context = SpringApplication.run(ExperimentalPlatformApplication.class, args);
-		context.getBean(ExperimentalNodeDao.class).deleteAll();
+		Boolean deleteContinue = true;
+		while (deleteContinue) {
+			try {
+				context.getBean(ExperimentalNodeDao.class).deleteAll();
+				deleteContinue = false;
+			} catch (Exception e) {
+				System.out.println(e.getMessage());
+			}
+		}
 	}
 }

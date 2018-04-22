@@ -58,9 +58,9 @@ public class CheckCodeService {
     //该函数随机生成7为数字
     private String makeNum() {
         Random r = new Random();
-        String num = r.nextInt(9999999) + "";
+        String num = r.nextInt(9999) + "";
         StringBuffer stringBuffer = new StringBuffer();
-        for(int i = 0; i < 7 - num.length(); i++) {
+        for(int i = 0; i < 4 - num.length(); i++) {
             stringBuffer.append("0");
         }
         num = stringBuffer.toString() + num;

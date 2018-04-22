@@ -3,15 +3,12 @@ package com.gxg.controller;
 import com.gxg.entities.User;
 import com.gxg.services.UserService;
 import com.gxg.services.VNCService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.web.ServerProperties;
+import org.springframework.beans.factory.annotation.Autowired;;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
-import sun.net.www.protocol.http.logging.HttpLogFormatter;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
-import javax.websocket.Session;
 
 /**
  * Created by 郭欣光 on 2017/12/27.
